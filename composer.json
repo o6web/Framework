@@ -1,7 +1,7 @@
 {
   "name": "o6web/framework",
   "description": "Framework for O6 Web Properties sites",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "homepage": "https://www.o6web.net",
   "authors": [
     {
@@ -12,15 +12,15 @@
   ],
   "require": {
     "php": ">=7.1.0",
-    "aws/aws-sdk-php": "2.*"
-  },
-  "require-dev": {
-    "roave/security-advisories": "dev-master",
+    "aws/aws-sdk-php": "2.*",
     "phpoffice/phpspreadsheet": "^1.6",
     "ext-curl": "*",
     "chrisjean/php-ico": "^1.0",
     "cjrasmussen/color": "^1.1",
     "cjrasmussen/slack-api": "^1.0"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-master"
   },
   "autoload": {
     "psr-4": {
