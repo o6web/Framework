@@ -1,0 +1,30 @@
+{
+  "name": "o6web/framework",
+  "description": "Framework for O6 Web Properties sites",
+  "version": "1.0.0",
+  "homepage": "https://www.o6web.net",
+  "authors": [
+    {
+      "name": "Clark Rasmussen",
+      "homepage": "https://www.clarkrasmussen.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=7.1.0",
+    "aws/aws-sdk-php": "2.*"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-master",
+    "phpoffice/phpspreadsheet": "^1.6",
+    "ext-curl": "*",
+    "chrisjean/php-ico": "^1.0",
+    "cjrasmussen/color": "^1.1",
+    "cjrasmussen/slack-api": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "O6\\Framework\\": "src/"
+    }
+  }
+}
