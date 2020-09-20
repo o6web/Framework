@@ -3,8 +3,8 @@
 namespace O6\Framework\Services;
 
 use Exception;
-use O6\Framework\Services\PDO\ExceptionLogger;
 use O6\Framework\Services\PDO\Statement;
+use O6\Logging\ExceptionLogger;
 use PDOException;
 
 /**

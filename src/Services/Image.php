@@ -4,6 +4,7 @@ namespace O6\Framework\Services;
 use chrisjean\PHP_ICO;
 use cjrasmussen\Color\Convert;
 use cjrasmussen\Color\General;
+use O6\Logging\ErrorLogger;
 use ZipArchive;
 
 /**
@@ -51,7 +52,7 @@ class Image
 		}
 
 		if ($gutter) {
-			$src = Image::addGutter($src, $gutter);
+			$src = self::addGutter($src, $gutter);
 		}
 
 		$img = imagecreatetruecolor($dst_w, $dst_h);

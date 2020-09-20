@@ -4,6 +4,7 @@ namespace O6\Framework\Services\PDO;
 
 use Exception;
 use O6\Framework\Services\PDO;
+use O6\Logging\ExceptionLogger;
 use PDOStatement;
 
 /**
