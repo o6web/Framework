@@ -24,7 +24,7 @@ class Autoloader
 		// remove the prefix
 		$prefix = array_shift($parts);
 
-		if ($prefix !== $local_prefix) {
+		if ($prefix !== trim($local_prefix, ' \\')) {
 			return;
 		}
 
