@@ -2,6 +2,7 @@
 
 namespace O6\Framework\Services;
 
+use Exception;
 use RuntimeException;
 
 class Curl
@@ -141,5 +142,50 @@ class Curl
 
 		// CLOSE THE SOCKET
 		fclose($fp);
+	}
+
+	/**
+	 * Gets an external file's contents using cURL, first requesting a cookie from another page
+	 *
+	 * @return string
+	 * @throws Exception
+	 * @see https://stackoverflow.com/questions/895786/how-to-get-the-cookies-from-a-php-curl-into-a-variable
+	 */
+	public static function getFileContentsWithCookie($url, $cookie_source): string
+	{
+		// DO A REQUEST TO GET A SESSION COOKIE
+		$c = curl_init($cookie_source);
+		curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($c, CURLOPT_HEADER, 1);
+		$result = curl_exec($c);
+
+		preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $result, $matches);
+		$cookies = $cookie = [];
+		foreach ($matches[1] as $item) {
+			parse_str($item, $cookie);
+			$cookies[] = $cookie;
+		}
+		$cookies = array_merge(...$cookies);
+
+		sleep(random_int(3, 8));
+
+		// GET THE NEW DATA
+		$header = [];
+		$header[] = 'Cookie: ' . http_build_query($cookies);
+		$header[] = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36';
+		$header[] = 'Accept: application/json, text/javascript, */*; q=0.01';
+		$header[] = 'Accept-Language: en-US,en;q=0.9';
+
+		$c = curl_init();
+		curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($c, CURLOPT_URL, $url);
+		curl_setopt($c, CURLOPT_REFERER, $cookie_source);
+		curl_setopt($c, CURLOPT_MAXREDIRS, 5);
+		curl_setopt($c, CURLOPT_HEADER, 0);
+		curl_setopt($c, CURLOPT_HTTPHEADER, $header);
+		$html = curl_exec($c);
+		curl_close($c);
+
+		return $html;
 	}
 }
