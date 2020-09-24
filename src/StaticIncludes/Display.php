@@ -112,7 +112,7 @@ class Display
 				if (!in_array(1, $use_pages, false)) {
 					$first_file = $file;
 
-					if ($first_file{(strlen($first_file) - 1)} === '?') {
+					if ($first_file[(strlen($first_file) - 1)] === '?') {
 						$first_file = substr($first_file, 0, -1);
 					}
 
