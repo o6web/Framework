@@ -21,12 +21,16 @@ class Autoloader
 		$parts = explode('\\', $class);
 		$class_name = array_pop($parts);
 
-		// remove the prefix
+		// GET THE REQUESTED PREFIX
 		$prefix = array_shift($parts);
 
 		if ($prefix !== trim($local_prefix, ' \\')) {
+			// DOESN'T MATCH THE ONE WE WANT, GET OUT AND TRY A DIFFERENT AUTOLOADER
 			return;
 		}
+
+		// SANITIZE THE LOCAL PATH
+		$local_path = '/' . trim($local_path, ' /') . '/';
 
 		$class_path = implode(DIRECTORY_SEPARATOR, $parts) . DIRECTORY_SEPARATOR . $class_name . '.php';
 		$path = $local_path . $class_path;
