@@ -19,7 +19,6 @@ class Statement extends PDOStatement
 	private $_inputParameters = [];
 	private $_expectedParameters = [];
 	private $executeResponse;
-	private $isSelectQuery;
 
 	/**
 	 * o6PDOStatement constructor.
@@ -38,16 +37,6 @@ class Statement extends PDOStatement
 	public function setExpectedParameters($expectedParameters): void
 	{
 		$this->_expectedParameters = $expectedParameters;
-	}
-
-	/**
-	 * Set whether or not this is a select query
-	 *
-	 * @param bool $value
-	 */
-	public function setIsSelectQuery(bool $value): void
-	{
-		$this->isSelectQuery = $value;
 	}
 
 	/**
@@ -185,8 +174,9 @@ class Statement extends PDOStatement
 	 */
 	public function fetch($mode = null, $cursorOrientation = \PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
 	{
-		if (!$this->isSelectQuery) {
-			ErrorLogger::logError($this->pdo->errorLog, new RuntimeException('Attempted fetch on non-select query'));
+		if (stripos(trim($this->queryString), 'SELECT') !== 0) {
+			$msg = 'Attempted fetch on non-select query:' . PHP_EOL . $this->queryString;
+			ErrorLogger::logError($this->pdo->errorLog, new RuntimeException($msg));
 		}
 
 		return parent::fetch($mode, $cursorOrientation, $cursorOffset);

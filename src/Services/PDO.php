@@ -183,8 +183,6 @@ class PDO extends \PDO
 				}
 			}
 
-			$stmt->setIsSelectQuery((stripos(trim($statement), 'SELECT') === 0));
-
 			return $stmt;
 		} catch (Exception $e) {
 			$this->hasError = 1;
@@ -206,9 +204,7 @@ class PDO extends \PDO
 	public function query($statement, $mode = PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, array $ctorargs = [])
 	{
 		try {
-			$stmt = parent::query($statement, $mode, $arg3, $ctorargs);
-			$stmt->setIsSelectQuery((stripos(trim($statement), 'SELECT') === 0));
-			return $stmt;
+			return parent::query($statement, $mode, $arg3, $ctorargs);
 		} catch (Exception $e) {
 			$this->hasError = 1;
 			ExceptionLogger::logError($e, $this->errorLog, $statement);
