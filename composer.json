@@ -1,7 +1,7 @@
 {
   "name": "o6web/framework",
   "description": "Framework for O6 Web Properties sites",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "homepage": "https://www.o6web.net",
   "authors": [
     {
@@ -23,8 +23,9 @@
   "require": {
     "php": ">=7.1.0",
     "ext-curl": "*",
-    "ext-zip": "*",
     "ext-gd": "*",
+    "ext-pdo": "*",
+    "ext-zip": "*",
     "o6web/logging": "^1.0.0",
     "phpoffice/phpspreadsheet": "^1.6",
     "chrisjean/php-ico": "^1.0",

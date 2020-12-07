@@ -4,8 +4,10 @@ namespace O6\Framework\Services\PDO;
 
 use Exception;
 use O6\Framework\Services\PDO;
+use O6\Logging\ErrorLogger;
 use O6\Logging\ExceptionLogger;
 use PDOStatement;
+use RuntimeException;
 
 /**
  * O6 PDO Statement class
@@ -17,6 +19,7 @@ class Statement extends PDOStatement
 	private $_inputParameters = [];
 	private $_expectedParameters = [];
 	private $executeResponse;
+	private $isSelectQuery;
 
 	/**
 	 * o6PDOStatement constructor.
@@ -35,6 +38,16 @@ class Statement extends PDOStatement
 	public function setExpectedParameters($expectedParameters): void
 	{
 		$this->_expectedParameters = $expectedParameters;
+	}
+
+	/**
+	 * Set whether or not this is a select query
+	 *
+	 * @param bool $value
+	 */
+	public function setIsSelectQuery(bool $value): void
+	{
+		$this->isSelectQuery = $value;
 	}
 
 	/**
@@ -160,6 +173,23 @@ class Statement extends PDOStatement
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Fetch the next result from the statement
+	 *
+	 * @param null $mode
+	 * @param int $cursorOrientation
+	 * @param int $cursorOffset
+	 * @return mixed
+	 */
+	public function fetch($mode = null, $cursorOrientation = \PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
+	{
+		if (!$this->isSelectQuery) {
+			ErrorLogger::logError($this->pdo->errorLog, new RuntimeException('Attempted fetch on non-select query'));
+		}
+
+		return parent::fetch($mode, $cursorOrientation, $cursorOffset);
 	}
 
 	/**
