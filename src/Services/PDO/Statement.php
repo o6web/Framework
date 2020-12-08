@@ -19,6 +19,7 @@ class Statement extends PDOStatement
 	private $_inputParameters = [];
 	private $_expectedParameters = [];
 	private $executeResponse;
+	private $isFetchFriendly;
 
 	/**
 	 * o6PDOStatement constructor.
@@ -27,6 +28,7 @@ class Statement extends PDOStatement
 	protected function __construct($pdo)
 	{
 		$this->pdo = $pdo;
+		$this->isFetchFriendly = ((stripos(trim($this->queryString), 'SELECT') === 0) OR (stripos(trim($this->queryString), 'SHOW') === 0));
 	}
 
 	/**
@@ -174,8 +176,8 @@ class Statement extends PDOStatement
 	 */
 	public function fetch($mode = null, $cursorOrientation = \PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
 	{
-		if (stripos(trim($this->queryString), 'SELECT') !== 0) {
-			$msg = 'Attempted fetch on non-select query:' . PHP_EOL . $this->queryString;
+		if (!$this->isFetchFriendly) {
+			$msg = 'Attempted fetch on non-select/show query:' . PHP_EOL . $this->queryString;
 			ErrorLogger::logError($this->pdo->errorLog, new RuntimeException($msg));
 		}
 
