@@ -1,7 +1,7 @@
 {
   "name": "o6web/framework",
   "description": "Framework for O6 Web Properties sites",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "homepage": "https://www.o6web.net",
   "authors": [
     {
@@ -29,7 +29,8 @@
     "o6web/logging": "^1.0.0",
     "phpoffice/phpspreadsheet": "^1.6",
     "chrisjean/php-ico": "^1.0",
-    "cjrasmussen/color": "^1.1"
+    "cjrasmussen/color": "^1.1",
+    "cjrasmussen/string": "^1.1"
   },
   "require-dev": {
     "roave/security-advisories": "dev-master"

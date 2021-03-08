@@ -2,6 +2,7 @@
 
 namespace O6\Framework\Services;
 
+use cjrasmussen\String\Strings;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
@@ -22,11 +23,12 @@ class FileSystem
 		foreach (new RecursiveIteratorIterator($dir) AS $file) {
 			$filename = $file->getPath() . '/' . $file->getFilename();
 
-			if ($search) {
-				if (false !== strpos($filename, $search)) {
-					$files[] = $filename;
-				}
-			} elseif ((substr($filename, -1) !== '.') AND (substr($filename, -1) !== '/')) {
+			if ((substr($filename, -1) === '.') OR (substr($filename, -1) === '/')) {
+				// SKIP IF THE FILE ENDS IN A DOT OR A SLASH
+				continue;
+			}
+
+			if (Strings::strContains($filename, $search)) {
 				$files[] = $filename;
 			}
 		}
