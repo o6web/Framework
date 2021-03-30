@@ -369,7 +369,7 @@ class Image
 	 * @param int $size
 	 * @return array
 	 */
-	private static function imageGetTextBoxSize($text, $font, $size): array
+	public static function imageGetTextBoxSize($text, $font, $size): array
 	{
 		$font_type = strrev(explode('.', strrev($font))[0]);
 
