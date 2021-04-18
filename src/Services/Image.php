@@ -3,7 +3,7 @@ namespace O6\Framework\Services;
 
 use chrisjean\PHP_ICO;
 use cjrasmussen\Color\Convert;
-use cjrasmussen\Color\General;
+use cjrasmussen\Image\Resize;
 use O6\Logging\ErrorLogger;
 use ZipArchive;
 
@@ -13,15 +13,6 @@ use ZipArchive;
  */
 class Image
 {
-	public const TextVerticalAlignNone = 0;
-	public const TextVerticalAlignBottom = 1;
-	public const TextVerticalAlignMiddle = 2;
-	public const TextVerticalAlignTop = 3;
-	public const TextHorizontalAlignNone = 0;
-	public const TextHorizontalAlignLeft = 1;
-	public const TextHorizontalAlignCenter = 2;
-	public const TextHorizontalAlignRight = 3;
-
 	/**
 	 * Take an image file and return an image resource resized to the specified dimensions
 	 *
@@ -107,77 +98,11 @@ class Image
 			}
 		}
 
-		$src_w = imagesx($src);
-		$src_h = imagesy($src);
-
-		static::resizeFit($img, $src, $dst_w, $dst_h, $src_w, $src_h);
+		Resize::fitToImage($img, $src);
 
 		imagedestroy($src);
 
 		return $img;
-	}
-
-	/**
-	 * Copy an image resource onto another image resource, resizing to fit
-	 *
-	 * @param resource $dst_image
-	 * @param resource $src_image
-	 * @param int $dst_w
-	 * @param int $dst_h
-	 * @param int $src_w
-	 * @param int $src_h
-	 * @param int $crop
-	 */
-	public static function resizeFit(&$dst_image, &$src_image, $dst_w, $dst_h, $src_w, $src_h, $crop = 0)
-	{
-		if ($crop) {
-			if (($src_w / $src_h) > ($dst_w / $dst_h)) {
-				// TOO WIDE
-				$use_width = $dst_w * ($src_h / $dst_h);
-				$use_height = $src_h;
-				$src_x = ($src_w - $use_width) / 2;
-				$src_y = 0;
-			} elseif (($src_w / $src_h) < ($dst_w / $dst_h)) {
-				// TOO TALL
-				$use_width = $src_w;
-				$use_height = $dst_h * ($src_w / $dst_w);
-				$src_x = 0;
-				$src_y = ($src_h - $use_height) / 2;
-			} else {
-				$src_x = 0;
-				$src_y = 0;
-				$use_width = $dst_w;
-				$use_height = $dst_h;
-			}
-
-			$src_w = $use_width;
-			$src_h = $use_height;
-		} else {
-			if (($src_w / $src_h) > ($dst_w / $dst_h)) {
-				// TOO WIDE
-				$use_width = $dst_w;
-				$use_height = ($src_h / $src_w) * $dst_w;
-				$dst_x = 0;
-				$dst_y = ($dst_h - $use_height) / 2;
-			} elseif (($src_w / $src_h) < ($dst_w / $dst_h)) {
-				// TOO TALL
-				$use_width = ($src_w / $src_h) * $dst_h;
-				$use_height = $dst_h;
-				$dst_x = ($dst_w - $use_width) / 2;
-				$dst_y = 0;
-			} else {
-				$src_x = 0;
-				$src_y = 0;
-				$use_width = $dst_w;
-				$use_height = $dst_h;
-			}
-
-			$dst_w = $use_width;
-			$dst_h = $use_height;
-		}
-
-		imagecopyresampled($dst_image, $src_image, (int)$dst_x, (int)$dst_y, (int)$src_x, (int)$src_y,
-			(int)$dst_w, (int)$dst_h, (int)$src_w, (int)$src_h);
 	}
 
 	/**
@@ -218,49 +143,6 @@ class Image
 	}
 
 	/**
-	 * Get the width, height, and scale of an image resized to fit a box
-	 *
-	 * @param int $width
-	 * @param int $height
-	 * @param int $max_width
-	 * @param int $max_height
-	 * @return array
-	 */
-	public static function resizeMax($width, $height, $max_width, $max_height)
-	{
-		$horiz_scale = $max_width / $width;
-		$vert_scale = $max_height / $height;
-
-		if (($width > $max_width) AND ($height > $max_height)) {
-			if ((abs($horiz_scale - 1)) > (abs($vert_scale - 1))) {
-				$use_width = $max_width;
-				$use_height = floor($height * $horiz_scale);
-				$scale = floor($horiz_scale * 100);
-			} else {
-				$use_width = floor($width * $vert_scale);
-				$use_height = $max_height;
-				$scale = floor($vert_scale * 100);
-			}
-		} elseif ($width > $max_width) {
-			$use_width = $max_width;
-			$use_height = floor($height * $horiz_scale);
-			$scale = floor($horiz_scale * 100);
-		} else {
-			$use_width = floor($width * $vert_scale);
-			$use_height = $max_height;
-			$scale = floor($vert_scale * 100);
-		}
-
-		if ($scale > 100) {
-			$use_width = $width;
-			$use_height = $height;
-			$scale = 100;
-		}
-
-		return ['w' => $use_width, 'h' => $use_height, 's' => $scale];
-	}
-
-	/**
 	 * Set the opacity of an image resource
 	 *
 	 * @param resource $img
@@ -280,122 +162,6 @@ class Image
 					imagecolorallocatealpha($img, $color['red'], $color['green'], $color['blue'], $color['alpha']));
 			}
 		}
-	}
-
-	/**
-	 * Add a block of text to an image resource
-	 *
-	 * @param resource $img
-	 * @param string $text
-	 * @param string $font
-	 * @param int $size
-	 * @param resource|string $color
-	 * @param int $x
-	 * @param int $y
-	 * @param int $alignment_horizontal
-	 * @param int $alignment_vertical
-	 * @param int|null $max_width
-	 * @param int $stroke
-	 * @param resource|string|null $strokeColor
-	 */
-	public static function imageWriteText(
-		&$img,
-		$text,
-		$font,
-		$size,
-		$color,
-		$x,
-		$y,
-		$alignment_horizontal = self::TextHorizontalAlignLeft,
-		$alignment_vertical = self::TextVerticalAlignTop,
-		$max_width = null,
-		$stroke = 0,
-		$strokeColor = null
-	): void {
-		if (General::isHexColor($color)) {
-			$rgb = Convert::hexToRgb($color);
-			$color = imagecolorallocate($img, $rgb->R, $rgb->G, $rgb->B);
-		}
-
-		if (($strokeColor !== null) AND (General::isHexColor($strokeColor))) {
-			$rgb = Convert::hexToRgb($strokeColor);
-			$strokeColor = imagecolorallocate($img, $rgb->R, $rgb->G, $rgb->B);
-		}
-
-		$font_type = strrev(explode('.', strrev($font))[0]);
-		$size_original = $size;
-		$stroke_original = $stroke;
-
-		$size++;
-		do {
-			$size--;
-			$box_size = self::imageGetTextBoxSize($text, $font, $size);
-			$stroke = round($stroke_original * ($size / $size_original));
-			$actual_width = $box_size['width'] + ($stroke * 2);
-		} while (($max_width !== null) AND ($actual_width > $max_width));
-
-		if ($alignment_horizontal === self::TextHorizontalAlignCenter) {
-			$x -= round($box_size['width'] / 2);
-		} elseif ($alignment_horizontal === self::TextHorizontalAlignRight) {
-			$x -= $box_size['width'];
-		}
-
-		if ($alignment_vertical === self::TextVerticalAlignMiddle) {
-			$y += round($box_size['baseline'] / 2);
-		} elseif ($alignment_vertical === self::TextVerticalAlignTop) {
-			$y += $box_size['baseline'];
-		} else {
-			$y -= $box_size['height'] - $box_size['baseline'];
-		}
-
-		if (($stroke) AND ($strokeColor)) {
-			if ($font_type === 'ttf') {
-				self::imagettfstroketext($img, $size, 0, $x, $y, $color, $strokeColor, $font, $text, $stroke);
-			} else {
-				self::imageftstroketext($img, $size, 0, $x, $y, $color, $strokeColor, $font, $text, $stroke);
-			}
-		} elseif ($font_type === 'ttf') {
-			imagettftext($img, $size, 0, $x, $y, $color, $font, $text);
-		} else {
-			imagefttext($img, $size, 0, $x, $y, $color, $font, $text);
-		}
-	}
-
-	/**
-	 * Return the size of the box required for the given text
-	 *
-	 * @param string $text
-	 * @param string $font
-	 * @param int $size
-	 * @return array
-	 */
-	public static function imageGetTextBoxSize($text, $font, $size): array
-	{
-		$font_type = strrev(explode('.', strrev($font))[0]);
-
-		if ($font_type === 'ttf') {
-			$box = imagettfbbox($size, 0, $font, $text);
-		} else {
-			$box = imageftbbox($size, 0, $font, $text);
-		}
-
-		$box_width = abs($box[0] - $box[2]);
-		$box_height = abs($box[1] - $box[5]);
-
-		$text = 'ABCDEF';
-		if ($font_type === 'ttf') {
-			$box = imagettfbbox($size, 0, $font, $text);
-		} else {
-			$box = imageftbbox($size, 0, $font, $text);
-		}
-
-		$default_height = abs($box[1] - $box[5]);
-
-		return [
-			'width' => $box_width,
-			'height' => $box_height,
-			'baseline' => $box_height - ($box_height - $default_height),
-		];
 	}
 
 	/**
@@ -521,60 +287,5 @@ class Image
 		}
 
 		return $files;
-	}
-
-
-	/**
-	 * Writes the given text with a border into the image using TrueType fonts.
-	 *
-	 * @param resource $image
-	 * @param int $size
-	 * @param int $angle
-	 * @param int $x
-	 * @param int $y
-	 * @param resource $textcolor
-	 * @param resource $strokecolor
-	 * @param string $fontfile
-	 * @param string $text
-	 * @param int $px
-	 * @see http://johnciacia.com/2010/01/04/using-php-and-gd-to-add-border-to-text/
-	 */
-	private static function imagettfstroketext(&$image, $size, $angle, $x, $y, &$textcolor, &$strokecolor, $fontfile, $text, $px): void
-	{
-
-		for ($c1 = ($x - abs($px)); $c1 <= ($x + abs($px)); $c1++) {
-			for ($c2 = ($y - abs($px)); $c2 <= ($y + abs($px)); $c2++) {
-				imagettftext($image, $size, $angle, $c1, $c2, $strokecolor, $fontfile, $text);
-			}
-		}
-
-		imagettftext($image, $size, $angle, $x, $y, $textcolor, $fontfile, $text);
-	}
-
-	/**
-	 * Writes the given text with a border into the image
-	 *
-	 * @param resource $image
-	 * @param int $size
-	 * @param int $angle
-	 * @param int $x
-	 * @param int $y
-	 * @param resource $textcolor
-	 * @param resource $strokecolor
-	 * @param string $fontfile
-	 * @param string $text
-	 * @param int $px
-	 * @see http://johnciacia.com/2010/01/04/using-php-and-gd-to-add-border-to-text/
-	 */
-	private static function imageftstroketext(&$image, $size, $angle, $x, $y, &$textcolor, &$strokecolor, $fontfile, $text, $px): void
-	{
-
-		for ($c1 = ($x - abs($px)); $c1 <= ($x + abs($px)); $c1++) {
-			for ($c2 = ($y - abs($px)); $c2 <= ($y + abs($px)); $c2++) {
-				imagefttext($image, $size, $angle, $c1, $c2, $strokecolor, $fontfile, $text);
-			}
-		}
-
-		imagefttext($image, $size, $angle, $x, $y, $textcolor, $fontfile, $text);
 	}
 }
