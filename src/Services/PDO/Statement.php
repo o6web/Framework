@@ -4,8 +4,6 @@ namespace O6\Framework\Services\PDO;
 
 use Exception;
 use O6\Framework\Services\PDO;
-use O6\Logging\ErrorLogger;
-use O6\Logging\ExceptionLogger;
 use PDOStatement;
 use RuntimeException;
 
@@ -25,7 +23,7 @@ class Statement extends PDOStatement
 	 * o6PDOStatement constructor.
 	 * @param PDO $pdo
 	 */
-	protected function __construct($pdo)
+	protected function __construct(PDO $pdo)
 	{
 		$this->pdo = $pdo;
 		$this->isFetchFriendly = ((stripos(trim($this->queryString), 'SELECT') === 0) OR (stripos(trim($this->queryString), 'SHOW') === 0));
@@ -34,9 +32,9 @@ class Statement extends PDOStatement
 	/**
 	 * Set the expected parameters
 	 *
-	 * @param $expectedParameters
+	 * @param array $expectedParameters
 	 */
-	public function setExpectedParameters($expectedParameters): void
+	public function setExpectedParameters(array $expectedParameters): void
 	{
 		$this->_expectedParameters = $expectedParameters;
 	}
@@ -54,17 +52,17 @@ class Statement extends PDOStatement
 	/**
 	 * Bind a value to the statement, stripping slashes and forcing NULLs for strings
 	 *
-	 * @param mixed $parameter
-	 * @param mixed $value
-	 * @param int $data_type
+	 * @param int|string $param
+	 * @param int|string|null|array $value
+	 * @param int $type
 	 * @param int $null_opt
 	 * @param int $length
 	 * @return bool
 	 */
 	public function bindValue(
-		$parameter,
+		$param,
 		$value,
-		$data_type = PDO::PARAM_STR,
+		$type = PDO::PARAM_STR,
 		$null_opt = PDO::NULL_OPT_NONE,
 		$length = null
 	): ?bool {
@@ -76,34 +74,34 @@ class Statement extends PDOStatement
 			$n = 1;
 			do {
 				foreach ($value AS $val) {
-					if (is_numeric($parameter)) {
-						$field = $parameter + $n - 1;
+					if (is_numeric($param)) {
+						$field = $param + $n - 1;
 					} else {
-						$field = $parameter . $n;
+						$field = $param . $n;
 					}
 
-					$this->bindValue($field, $val, $data_type, $null_opt, $length);
+					$this->bindValue($field, $val, $type, $null_opt, $length);
 					$n++;
 				}
-			} while ($n <= $this->_expectedParameters[$parameter]);
+			} while ($n <= $this->_expectedParameters[$param]);
 
 			return $n;
 		}
 
 		// IF WE EXPECT MORE THAN ONE, LOOP THROUGH TO ASSIGN THE VALUE EVERYWHERE NEEDED
-		if ($this->_expectedParameters[$parameter] > 1) {
+		if ($this->_expectedParameters[$param] > 1) {
 			$result = false;
-			for ($n = 1; $n <= $this->_expectedParameters[$parameter]; $n++) {
-				$result = $this->bindValue(($parameter . $n), $value, $data_type, $null_opt, $length);
+			for ($n = 1; $n <= $this->_expectedParameters[$param]; $n++) {
+				$result = $this->bindValue(($param . $n), $value, $type, $null_opt, $length);
 			}
 
 			return $result;
 		}
 
-		if ($data_type === PDO::PARAM_INT) {
+		if ($type === PDO::PARAM_INT) {
 			if (((int)$value === 0) AND ($null_opt === PDO::NULL_OPT_FORCE)) {
 				$value = null;
-				$data_type = PDO::PARAM_NULL;
+				$type = PDO::PARAM_NULL;
 			} elseif (($value === null) AND ($null_opt === PDO::NULL_OPT_DISALLOW)) {
 				$value = 0;
 			} elseif ($value === '') {
@@ -111,7 +109,7 @@ class Statement extends PDOStatement
 			} elseif ($value !== '') {
 				$value = (int)$value;
 			}
-		} elseif ($data_type === PDO::PARAM_STR) {
+		} elseif ($type === PDO::PARAM_STR) {
 			if (($null_opt === PDO::NULL_OPT_FORCE) AND ($value === '')) {
 				$value = null;
 			} elseif (($null_opt === PDO::NULL_OPT_DISALLOW) AND ($value === null)) {
@@ -121,20 +119,20 @@ class Statement extends PDOStatement
 			}
 
 			if ($value === null) {
-				$data_type = PDO::PARAM_NULL;
+				$type = PDO::PARAM_NULL;
 			} else {
 				// WORDPRESS REQUIRES THIS
 				$value = stripslashes($value);
 			}
 		}
 
-		$this->_inputParameters[$parameter] = ['value' => $value, 'type' => $data_type];
+		$this->_inputParameters[$param] = ['value' => $value, 'type' => $type];
 
 		try {
-			return parent::bindValue($parameter, $value, $data_type);
+			return parent::bindValue($param, $value, $type);
 		} catch (Exception $e) {
 			$this->pdo->hasError = 1;
-			ExceptionLogger::logError($e, $this->pdo->errorLog, $this->debugDumpParams());
+			$this->pdo->logger->logException($e, $this->debugDumpParams());
 			return false;
 		}
 	}
@@ -142,25 +140,23 @@ class Statement extends PDOStatement
 	/**
 	 * Execute an o6PDOStatement and log any errors, returning the o6PDOStatement
 	 *
-	 * @param null $inputParameters
+	 * @param null $params
 	 * @return self|bool
 	 */
-	public function execute($inputParameters = null)
+	public function execute($params = null)
 	{
 		try {
-			$this->executeResponse = parent::execute($inputParameters);
+			$this->executeResponse = parent::execute($params);
 		} catch (Exception $e) {
 			$this->pdo->hasError = 1;
-			ExceptionLogger::logError($e, $this->pdo->errorLog, $this->debugDumpParams(),
-				$this->_inputParameters);
+			$this->pdo->logger->logException($e, $this->debugDumpParams(), $this->_inputParameters);
 			return false;
 		}
 
 		if (!$this->executeResponse) {
 			$msg = 'Prepared statement could not be executed' . "\n";
 			$msg .= print_r($this->errorInfo(), true);
-			ExceptionLogger::logError(new Exception(trim($msg)), $this->pdo->errorLog, $this->debugDumpParams(),
-				$this->_inputParameters);
+			$this->pdo->logger->logException((new Exception(trim($msg))), $this->debugDumpParams(), $this->_inputParameters);
 		}
 
 		return $this;
@@ -178,7 +174,7 @@ class Statement extends PDOStatement
 	{
 		if (!$this->isFetchFriendly) {
 			$msg = 'Attempted fetch on non-select/show query:' . PHP_EOL . $this->queryString;
-			ErrorLogger::logError($this->pdo->errorLog, new RuntimeException($msg));
+			$this->pdo->logger->logError((new RuntimeException($msg)));
 		}
 
 		return parent::fetch($mode, $cursorOrientation, $cursorOffset);

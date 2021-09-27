@@ -4,7 +4,7 @@ namespace O6\Framework\Services;
 
 use Exception;
 use O6\Framework\Services\PDO\Statement;
-use O6\Logging\ExceptionLogger;
+use O6\Logging\Logger;
 use PDOException;
 
 /**
@@ -17,8 +17,8 @@ class PDO extends \PDO
 	public const NULL_OPT_FORCE = 1;
 	public const NULL_OPT_DISALLOW = 2;
 
-	public $errorLog;
 	public $hasError = 0;
+	public $logger;
 	protected $_transactionDepth = 0;
 	private $_database;
 	private $_param = [];
@@ -30,25 +30,25 @@ class PDO extends \PDO
 	 * @param string $dsn
 	 * @param string $username
 	 * @param string $passwd
+	 * @param Logger $logger
 	 * @param array $options
-	 * @param string $error_log
 	 */
-	public function __construct($dsn, $username, $passwd, array $options = [], $error_log = '')
+	public function __construct(string $dsn, string $username, string $passwd, Logger $logger, array $options = [])
 	{
 		// PULL THE INITIAL DB OUT OF THE DSN, IF THERE IS ONE
 		$dsn_parts = $this->getDsnParts($dsn);
 
 		if ($dsn_parts['dbname']) {
-			$this->_database = $dsn_parts['dbname'];
+			$this->useDatabase($dsn_parts['dbname']);
 		}
 
-		$this->errorLog = trim($error_log);
+		$this->logger = $logger;
 
 		try {
 			parent::__construct($dsn, $username, $passwd, $options);
 			$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, ['\O6\Framework\Services\PDO\Statement', [$this]]);
 		} catch (Exception $e) {
-			ExceptionLogger::logError($e, $this->errorLog);
+			$this->logger->logException($e);
 		}
 	}
 
@@ -115,13 +115,13 @@ class PDO extends \PDO
 	 * @param string $statement
 	 * @return int|false
 	 */
-	public function exec($statement)
+	public function exec(string $statement)
 	{
 		try {
 			return parent::exec($statement);
 		} catch (Exception $e) {
 			$this->hasError = 1;
-			ExceptionLogger::logError($e, $this->errorLog, $statement);
+			$this->logger->logException($e, $statement);
 		}
 
 		return false;
@@ -130,24 +130,19 @@ class PDO extends \PDO
 	/**
 	 * Prepare a statement with optional database definition and error logging
 	 *
-	 * @param string $statement
-	 * @param string|null $database
-	 * @param array|null $driver_options
+	 * @param string $query
+	 * @param array|null $options
 	 * @return Statement|false
 	 */
-	public function prepare($statement, $database = null, $driver_options = null)
+	public function prepare(string $query, $options = null)
 	{
-		if ($database) {
-			$this->useDatabase($database);
-		}
-
-		if (!is_array($driver_options)) {
-			$driver_options = [];
+		if (!is_array($options)) {
+			$options = [];
 		}
 
 		// PARSE THE EXPECTED MATCHES
 		$expected = [];
-		preg_match_all('/:[^%]\\D\\w*/', $statement, $matches);
+		preg_match_all('/:[^%]\\D\\w*/', $query, $matches);
 
 		foreach ($matches[0] AS $match) {
 			$expected[substr($match, 1)]++;
@@ -159,19 +154,19 @@ class PDO extends \PDO
 			}
 
 			for ($n = 1; $n <= $count; $n++) {
-				$statement = preg_replace(('/:' . $key . '\b/'), (':' . $key . $n), $statement, 1);
+				$query = preg_replace(('/:' . $key . '\b/'), (':' . $key . $n), $query, 1);
 			}
 		}
 
 		try {
 			// CHECK TO SEE IF WE'VE ALREADY PREPARED THIS AND, IF SO, USE IT
-			$cache_key = md5(var_export($statement, true) . var_export($driver_options, true) . var_export($database, true));
+			$cache_key = md5(var_export($query, true) . var_export($options, true) . var_export($this->_database, true));
 			if ($this->prepareCache[$cache_key]) {
 				/* @var PDO\Statement $stmt */
 				$stmt = $this->prepareCache[$cache_key];
 			} else {
 				/* @var PDO\Statement $stmt */
-				$stmt = $this->prepareCache[$cache_key] = parent::prepare($statement, $driver_options);
+				$stmt = $this->prepareCache[$cache_key] = parent::prepare($query, $options);
 			}
 
 			$stmt->setExpectedParameters($expected);
@@ -186,7 +181,7 @@ class PDO extends \PDO
 			return $stmt;
 		} catch (Exception $e) {
 			$this->hasError = 1;
-			ExceptionLogger::logError($e, $this->errorLog, $statement);
+			$this->logger->logException($e, $query);
 		}
 
 		return false;
@@ -201,13 +196,13 @@ class PDO extends \PDO
 	 * @param array|null $ctorargs
 	 * @return Statement|false
 	 */
-	public function query($statement, $mode = PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, array $ctorargs = [])
+	public function query(string $statement, $mode = PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, array $ctorargs = [])
 	{
 		try {
 			return parent::query($statement, $mode, $arg3, $ctorargs);
 		} catch (Exception $e) {
 			$this->hasError = 1;
-			ExceptionLogger::logError($e, $this->errorLog, $statement);
+			$this->logger->logException($e, $statement);
 		}
 
 		return false;
@@ -217,18 +212,15 @@ class PDO extends \PDO
 	 * Run a query with database definition and error logging
 	 *
 	 * @param string $statement
-	 * @param string $database
 	 * @return Statement|false
 	 */
-	public function run($statement, $database = null)
+	public function run(string $statement)
 	{
-		$this->useDatabase($database);
-
 		try {
 			return parent::query($statement);
 		} catch (Exception $e) {
 			$this->hasError = 1;
-			ExceptionLogger::logError($e, $this->errorLog, $statement);
+			$this->logger->logException($e, $statement);
 		}
 
 		return false;
@@ -237,8 +229,8 @@ class PDO extends \PDO
 	/**
 	 * Bind a value to the connection, allowing it to be used across all statements
 	 *
-	 * @param mixed $parameter
-	 * @param mixed $value
+	 * @param int|string $parameter
+	 * @param int|string|null $value
 	 * @param int $data_type
 	 * @param int $null_opt
 	 */
@@ -258,7 +250,7 @@ class PDO extends \PDO
 	/**
 	 * Unbind the a parameter value from the connection
 	 *
-	 * @param mixed $parameter
+	 * @param int|string $parameter
 	 * @return bool
 	 */
 	public function unBindValue($parameter): bool
@@ -273,7 +265,7 @@ class PDO extends \PDO
 	 * @param string $database
 	 * @return self
 	 */
-	private function useDatabase($database): self
+	public function useDatabase(string $database): self
 	{
 		if ((($database !== $this->_database) AND ($database)) && $this->exec('USE ' . $database) !== false) {
 			$this->_database = $database;
@@ -288,9 +280,9 @@ class PDO extends \PDO
 	 * @param string $dsn
 	 * @return array
 	 */
-	private function getDsnParts($dsn): array
+	private function getDsnParts(string $dsn): array
 	{
-		return array_map(function ($v) {
+		return array_map(static function ($v) {
 			return explode('=', $v);
 		}, explode(';', $dsn));
 	}
@@ -299,7 +291,7 @@ class PDO extends \PDO
 	 * Build a string of placeholders for use as parameters
 	 *
 	 * @param int|array $count
-	 * @param string $key
+	 * @param string|null $key
 	 * @return string
 	 */
 	public function buildInString($count, $key = null): string
