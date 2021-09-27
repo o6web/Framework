@@ -115,7 +115,7 @@ class PDO extends \PDO
 	 * @param string $statement
 	 * @return int|false
 	 */
-	public function exec(string $statement)
+	public function exec($statement)
 	{
 		try {
 			return parent::exec($statement);
@@ -134,7 +134,7 @@ class PDO extends \PDO
 	 * @param array|null $options
 	 * @return Statement|false
 	 */
-	public function prepare(string $query, $options = null)
+	public function prepare($query, $options = null)
 	{
 		if (!is_array($options)) {
 			$options = [];
@@ -196,28 +196,10 @@ class PDO extends \PDO
 	 * @param array|null $ctorargs
 	 * @return Statement|false
 	 */
-	public function query(string $statement, $mode = PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, array $ctorargs = [])
+	public function query($statement, $mode = PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, array $ctorargs = [])
 	{
 		try {
 			return parent::query($statement, $mode, $arg3, $ctorargs);
-		} catch (Exception $e) {
-			$this->hasError = 1;
-			$this->logger->logException($e, $statement);
-		}
-
-		return false;
-	}
-
-	/**
-	 * Run a query with database definition and error logging
-	 *
-	 * @param string $statement
-	 * @return Statement|false
-	 */
-	public function run(string $statement)
-	{
-		try {
-			return parent::query($statement);
 		} catch (Exception $e) {
 			$this->hasError = 1;
 			$this->logger->logException($e, $statement);
