@@ -128,7 +128,7 @@ class PDO extends \PDO
 	}
 
 	/**
-	 * Prepare a statement with optional database definition and error logging
+	 * Prepare a statement with included error logging
 	 *
 	 * @param string $query
 	 * @param array|null $options
@@ -188,7 +188,7 @@ class PDO extends \PDO
 	}
 
 	/**
-	 * Run a query with error logging
+	 * Run a query with included error logging
 	 *
 	 * @param string $statement
 	 * @param int $mode
@@ -200,6 +200,34 @@ class PDO extends \PDO
 	{
 		try {
 			return parent::query($statement, $mode, $arg3, $ctorargs);
+		} catch (Exception $e) {
+			$this->hasError = 1;
+			$this->logger->logException($e, $statement);
+		}
+
+		return false;
+	}
+
+	/**
+	 * Run a simple query with included error logging
+	 *
+	 * This is intended just for fetch assoc/num/both because they don't require the third and fourth parameters from
+	 * PDO::query and there's something weird when you supply null for those so extending it gets weird
+	 *
+	 * @param string $statement
+	 * @param int $mode
+	 * @return Statement|false
+	 */
+	public function run(string $statement, $mode = self::FETCH_ASSOC)
+	{
+		if (!in_array($mode, [self::FETCH_ASSOC, self::FETCH_NUM, self::FETCH_BOTH], true)) {
+			$msg = 'Invalid fetch mode defined';
+			$this->logger->logError(new Exception($msg));
+			return false;
+		}
+
+		try {
+			return parent::query($statement, $mode);
 		} catch (Exception $e) {
 			$this->hasError = 1;
 			$this->logger->logException($e, $statement);
