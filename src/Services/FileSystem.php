@@ -15,7 +15,7 @@ class FileSystem
 	 * @param string $search - must appear in the file name
 	 * @return array
 	 */
-	public static function scanDirRecursive($path, $search = '')
+	public static function scanDirRecursive(string $path, $search = ''): array
 	{
 		$files = [];
 
@@ -43,7 +43,7 @@ class FileSystem
 	 * @param string $data
 	 * @return false|int
 	 */
-	public static function filePutContents($path, $data): ?int
+	public static function filePutContents(string $path, string $data)
 	{
 		if (file_exists($path)) {
 			return file_put_contents($path, $data);
@@ -62,5 +62,4 @@ class FileSystem
 
 		return file_put_contents($path, $data);
 	}
-
 }

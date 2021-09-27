@@ -32,7 +32,7 @@ class SiteLock
 		if (file_exists($locking_file)) {
 			$ip_address = $_SERVER['REMOTE_ADDR'] ?: gethostbyname(parse_url($this->config['url']['home'], PHP_URL_HOST));
 
-			$lock_data = json_decode(file_get_contents($locking_file));
+			$lock_data = json_decode(file_get_contents($locking_file), false);
 
 			if ((!in_array($ip_address, $lock_data->allowed, true)) AND (!in_array('bypass_lock', $argv, true))) {
 				if (PHP_SAPI !== 'cli') {

@@ -16,9 +16,12 @@ class WPSession
 		$this->wp_path = $wp_path;
 	}
 
+	/** @noinspection PhpUndefinedClassInspection */
 	public function loadSessionUser(): ?\WP_User
 	{
+		/** @noinspection PhpIncludeInspection */
 		require $this->wp_path . 'wp-load.php';
+		/** @noinspection PhpUndefinedFunctionInspection */
 		return wp_get_current_user();
 	}
 }

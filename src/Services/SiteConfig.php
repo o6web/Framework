@@ -76,7 +76,10 @@ class SiteConfig
 	{
 		if (file_exists($this->globalConfigPath)) {
 			$global = [];
+
+			/** @noinspection PhpIncludeInspection */
 			require $this->globalConfigPath;
+
 			return $global;
 		}
 
@@ -90,15 +93,20 @@ class SiteConfig
 	 * @param array|null $global
 	 * @return array
 	 */
-	private function loadLocalConfig($local_config_path, $global = null): array
+	private function loadLocalConfig(string $local_config_path, $global = null): array
 	{
 		if (!is_array($global)) {
+			// GET THE GLOBAL VALUES SO THAT THEY'RE AVAILABLE WHEN LOADING LOCAL VALUES
+			/** @noinspection PhpUnusedLocalVariableInspection */
 			$global = $this->loadGlobalConfig();
 		}
 
 		if (file_exists($local_config_path)) {
 			$config = [];
+
+			/** @noinspection PhpIncludeInspection */
 			require $local_config_path;
+
 			return $config;
 		}
 
@@ -111,7 +119,7 @@ class SiteConfig
 	 * @param array $new
 	 * @param array $existing
 	 */
-	public function mergeConfigArrays($new, &$existing): void
+	public function mergeConfigArrays(array $new, array &$existing): void
 	{
 		foreach ($new AS $key => $value) {
 			if ((is_array($new[$key])) AND (is_array($existing[$key]))) {

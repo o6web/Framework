@@ -15,7 +15,7 @@ class Curl
 	 * @param string $url
 	 * @return string|bool
 	 */
-	public static function getFileContents($url)
+	public static function getFileContents(string $url)
 	{
 		$c = curl_init();
 		curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
@@ -71,7 +71,7 @@ class Curl
 	 * @param string $url
 	 * @return array
 	 */
-	public static function getPageHeader($url): array
+	public static function getPageHeader(string $url): array
 	{
 		$c = curl_init();
 		curl_setopt($c, CURLOPT_URL, $url);
@@ -92,7 +92,7 @@ class Curl
 	 * @param string $url
 	 * @return string
 	 */
-	public static function getUrlRedirect($url): string
+	public static function getUrlRedirect(string $url): string
 	{
 		$header = self::getPageHeader($url);
 		return $header['redirect_url'];
@@ -104,7 +104,7 @@ class Curl
 	 * @param string $url
 	 * @param array $params
 	 */
-	public static function postAsync($url, $params): void
+	public static function postAsync(string $url, array $params): void
 	{
 		// SET UP PARAMETERS
 		$post_string = '';

@@ -4,7 +4,10 @@ namespace O6\Framework\Services;
 use chrisjean\PHP_ICO;
 use cjrasmussen\Color\Convert;
 use cjrasmussen\Image\Resize;
-use O6\Logging\ErrorLogger;
+use GdImage;
+use O6\Logging\Logger;
+use O6\Logging\TraceHandler;
+use RuntimeException;
 use ZipArchive;
 
 /**
@@ -25,7 +28,7 @@ class Image
 	 * @param int|string $gutter
 	 * @return resource
 	 */
-	public static function resize($path, $type, $dst_w, $dst_h, $bg_hex = '', $rounded = 0, $gutter = 0)
+	public static function resize(string $path, string $type, int $dst_w, int $dst_h, $bg_hex = '', $rounded = 0, $gutter = 0)
 	{
 		if (in_array($type, ['jpg', 'jpeg'])) {
 			$src = imagecreatefromjpeg($path);
@@ -36,9 +39,9 @@ class Image
 		}
 
 		if (!$src) {
-			$e = new \RuntimeException('Could not create image resource');
+			$e = new RuntimeException('Could not create image resource');
 			$detail = ['image_path' => $path, 'image_type' => $type];
-			ErrorLogger::logError($_ENV['config']['db']['error_log'], $e, $detail);
+			(new Logger((new TraceHandler()), $_ENV['config']['db']['error_log']))->logError($e, $detail);
 			throw $e;
 		}
 
@@ -110,7 +113,7 @@ class Image
 	 *
 	 * @param resource $img
 	 * @param string|int $gutter - Number of pixels or percentage of source dimensions
-	 * @return false|resource
+	 * @return false|GdImage|resource
 	 */
 	public static function addGutter($img, $gutter = '10%')
 	{
@@ -148,7 +151,7 @@ class Image
 	 * @param resource $img
 	 * @param int $opacity
 	 */
-	public static function opacity(&$img, $opacity): void
+	public static function opacity(&$img, int $opacity): void
 	{
 		$w = imagesx($img);
 		$h = imagesy($img);
@@ -167,9 +170,9 @@ class Image
 	/**
 	 * Build a collection of favicons from a source image
 	 *
-	 * @param $src_path
-	 * @param $tmp_path
-	 * @param $bg_color
+	 * @param string $src_path
+	 * @param string $tmp_path
+	 * @param string $bg_color
 	 * @param array $sizes
 	 * @param int $ico
 	 * @param string $dst_file
@@ -177,10 +180,10 @@ class Image
 	 * @return array|bool
 	 */
 	public static function faviconCollection(
-		$src_path,
-		$tmp_path,
-		$bg_color,
-		$sizes = array(),
+		string $src_path,
+		string $tmp_path,
+		string $bg_color,
+		$sizes = [],
 		$ico = 0,
 		$dst_file = '',
 		$gutter = 0

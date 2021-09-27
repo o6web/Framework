@@ -10,7 +10,7 @@ class Sanitize
 	 * @param string $text
 	 * @return string
 	 */
-	public static function sql($text): string
+	public static function sql(string $text): string
 	{
 		$text = stripslashes($text);
 		$text = preg_replace('|;([ ]*)--|', '', $text);

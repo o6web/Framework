@@ -10,7 +10,7 @@ class StringFormat
 	 * @param string $ip
 	 * @return string
 	 */
-	public static function ipToFull($ip): string
+	public static function ipToFull(string $ip): string
 	{
 		if (strpos($ip, ':') !== false) {
 			return self::ip6ToFull($ip);
@@ -25,7 +25,7 @@ class StringFormat
 	 * @param string $ip
 	 * @return string
 	 */
-	public static function ip4ToFull($ip): string
+	public static function ip4ToFull(string $ip): string
 	{
 		$parts = explode('.', $ip);
 
@@ -43,7 +43,7 @@ class StringFormat
 	 * @param string $ip
 	 * @return string
 	 */
-	public static function ip6ToFull($ip): string
+	public static function ip6ToFull(string $ip): string
 	{
 		$parts = explode(':', $ip);
 

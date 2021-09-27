@@ -24,6 +24,7 @@
     "php": ">=7.1.0",
     "ext-curl": "*",
     "ext-gd": "*",
+    "ext-json": "*",
     "ext-pdo": "*",
     "ext-zip": "*",
     "o6web/logging": "^1.0.0",

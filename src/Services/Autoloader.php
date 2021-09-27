@@ -16,7 +16,7 @@ class Autoloader
 	 * @param string $local_prefix
 	 * @param string $local_path
 	 */
-	public static function autoload($class, $local_prefix, $local_path): void
+	public static function autoload(string $class, string $local_prefix, string $local_path): void
 	{
 		$parts = explode('\\', $class);
 		$class_name = array_pop($parts);
@@ -36,6 +36,7 @@ class Autoloader
 		$path = $local_path . $class_path;
 
 		if (file_exists($path)) {
+			/** @noinspection PhpIncludeInspection */
 			require_once $path;
 		}
 	}
@@ -46,7 +47,7 @@ class Autoloader
 	 * @param string $local_prefix
 	 * @param string $local_path
 	 */
-	public static function register($local_prefix, $local_path): void
+	public static function register(string $local_prefix, string $local_path): void
 	{
 		spl_autoload_register(static function ($class) use ($local_prefix, $local_path) {
 			self::autoload($class, $local_prefix, $local_path);

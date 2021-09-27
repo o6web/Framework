@@ -16,11 +16,11 @@ class CacheBust
 
 	/**
 	 * Get the value for the specified key
-	 * 
+	 *
 	 * @param string $key
 	 * @return mixed
 	 */
-	public function get($key)
+	public function get(string $key)
 	{
 		return $this->config[$key];
 	}
@@ -32,7 +32,7 @@ class CacheBust
 	 * @param mixed $value
 	 * @return $this
 	 */
-	public function set($key, $value): self
+	public function set(string $key, $value): self
 	{
 		if ($this->config[$key] !== $value) {
 			$this->config[$key] = $value;
