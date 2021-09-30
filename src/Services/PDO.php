@@ -35,6 +35,9 @@ class PDO extends \PDO
 	 */
 	public function __construct(string $dsn, string $username, string $passwd, Logger $logger, array $options = [])
 	{
+		parent::__construct($dsn, $username, $passwd, $options);
+		$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, ['\O6\Framework\Services\PDO\Statement', [$this]]);
+
 		// PULL THE INITIAL DB OUT OF THE DSN, IF THERE IS ONE
 		$dsn_parts = $this->getDsnParts($dsn);
 
@@ -43,13 +46,6 @@ class PDO extends \PDO
 		}
 
 		$this->logger = $logger;
-
-		try {
-			parent::__construct($dsn, $username, $passwd, $options);
-			$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, ['\O6\Framework\Services\PDO\Statement', [$this]]);
-		} catch (Exception $e) {
-			$this->logger->logException($e);
-		}
 	}
 
 	/**
