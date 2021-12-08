@@ -22,12 +22,12 @@ class Image
 	 * @param string $type
 	 * @param int $dst_w
 	 * @param int $dst_h
-	 * @param string $bg_hex
-	 * @param int $rounded
-	 * @param int|string $gutter
+	 * @param string|null $bg_hex
+	 * @param int|null $rounded
+	 * @param int|string|null $gutter
 	 * @return resource
 	 */
-	public static function resize(string $path, string $type, int $dst_w, int $dst_h, string $bg_hex = '', int $rounded = 0, int $gutter = 0)
+	public static function resize(string $path, string $type, int $dst_w, int $dst_h, ?string $bg_hex = '', ?int $rounded = 0, $gutter = 0)
 	{
 		if (in_array($type, ['jpg', 'jpeg'])) {
 			$src = imagecreatefromjpeg($path);
@@ -175,7 +175,7 @@ class Image
 	 * @param array $sizes
 	 * @param int $ico
 	 * @param string $dst_file
-	 * @param string|int $gutter
+	 * @param string|int|null $gutter
 	 * @return array|bool
 	 */
 	public static function faviconCollection(
@@ -185,7 +185,7 @@ class Image
 		array $sizes = [],
 		int $ico = 0,
 		string $dst_file = '',
-		int $gutter = 0
+		$gutter = 0
 	) {
 		if (!file_exists($src_path)) {
 			return false;
