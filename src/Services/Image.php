@@ -172,9 +172,9 @@ class Image
 	 * @param string $src_path
 	 * @param string $tmp_path
 	 * @param string $bg_color
-	 * @param array $sizes
-	 * @param int $ico
-	 * @param string $dst_file
+	 * @param array|null $sizes
+	 * @param bool|null $ico
+	 * @param string|null $dst_file
 	 * @param string|int|null $gutter
 	 * @return array|bool
 	 */
@@ -182,9 +182,9 @@ class Image
 		string $src_path,
 		string $tmp_path,
 		string $bg_color,
-		array $sizes = [],
-		int $ico = 0,
-		string $dst_file = '',
+		?array $sizes = [],
+		?bool $ico = false,
+		?string $dst_file = '',
 		$gutter = 0
 	) {
 		if (!file_exists($src_path)) {
@@ -261,7 +261,7 @@ class Image
 			unlink($tmp_dst);
 		}
 
-		if ((count($files)) AND ($dst_file)) {
+		if (($dst_file) && (count($files))) {
 			// EXPORT IMAGES TO ZIP
 			chdir($tmp_path);
 
