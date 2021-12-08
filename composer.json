@@ -1,7 +1,7 @@
 {
   "name": "o6web/framework",
   "description": "Framework for O6 Web Properties sites",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "homepage": "https://www.o6web.net",
   "authors": [
     {
@@ -29,10 +29,10 @@
     "ext-zip": "*",
     "o6web/logging": "^2.0.0",
     "phpoffice/phpspreadsheet": "^1.6",
-    "chrisjean/php-ico": "^1.0",
     "cjrasmussen/color": "^1.1",
     "cjrasmussen/image": "^1.0.0",
-    "cjrasmussen/string": "^1.1"
+    "cjrasmussen/string": "^1.1",
+    "shopblocks/php-ico": "^1.1"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest"

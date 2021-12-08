@@ -1,12 +1,11 @@
 <?php
 namespace O6\Framework\Services;
 
-use chrisjean\PHP_ICO;
 use cjrasmussen\Color\Convert;
 use cjrasmussen\Image\Resize;
-use GdImage;
 use O6\Logging\Logger;
 use O6\Logging\TraceHandler;
+use Ossobuffo\PhpIco\IcoConverter;
 use RuntimeException;
 use ZipArchive;
 
@@ -28,7 +27,7 @@ class Image
 	 * @param int|string $gutter
 	 * @return resource
 	 */
-	public static function resize(string $path, string $type, int $dst_w, int $dst_h, $bg_hex = '', $rounded = 0, $gutter = 0)
+	public static function resize(string $path, string $type, int $dst_w, int $dst_h, string $bg_hex = '', int $rounded = 0, int $gutter = 0)
 	{
 		if (in_array($type, ['jpg', 'jpeg'])) {
 			$src = imagecreatefromjpeg($path);
@@ -113,7 +112,7 @@ class Image
 	 *
 	 * @param resource $img
 	 * @param string|int $gutter - Number of pixels or percentage of source dimensions
-	 * @return false|GdImage|resource
+	 * @return false|resource
 	 */
 	public static function addGutter($img, $gutter = '10%')
 	{
@@ -183,11 +182,11 @@ class Image
 		string $src_path,
 		string $tmp_path,
 		string $bg_color,
-		$sizes = [],
-		$ico = 0,
-		$dst_file = '',
-		$gutter = 0
-	): array {
+		array $sizes = [],
+		int $ico = 0,
+		string $dst_file = '',
+		int $gutter = 0
+	) {
 		if (!file_exists($src_path)) {
 			return false;
 		}
@@ -256,8 +255,8 @@ class Image
 			$path = $tmp_path . 'favicon.ico';
 			$files[] = 'favicon.ico';
 
-			$ico = new PHP_ICO($tmp_dst, [[16, 16], [32, 32], [48, 48], [64, 64], [128, 128]]);
-			$ico->save_ico($path);
+			$icoConverter = new IcoConverter($tmp_dst, [[16, 16], [32, 32], [48, 48], [64, 64], [128, 128]]);
+			$icoConverter->saveIco($path);
 
 			unlink($tmp_dst);
 		}
