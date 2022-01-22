@@ -3,7 +3,7 @@
 namespace O6\Framework\Services;
 
 use Exception;
-use O6\Framework\Services\PDO\DatabaseNames;
+use O6\Framework\Services\PDO\DatabaseName;
 use O6\Framework\Services\PDO\Statement;
 use O6\Logging\Logger;
 use PDOException;
@@ -22,10 +22,10 @@ class PDO extends \PDO
 	public int $hasError = 0;
 	public Logger $logger;
 	protected int $_transactionDepth = 0;
-	private string $_database;
+	private string $_database = '';
 	private array $_param = [];
 	private array $prepareCache = [];
-	public ?DatabaseNames $names;
+	public $names;
 
 	/**
 	 * O6\Framework\Services\PDO constructor
@@ -52,13 +52,17 @@ class PDO extends \PDO
 	}
 
 	/**
+	 * Set the database names
 	 *
-	 *
-	 * @param DatabaseNames $names
+	 * @param $names
 	 * @return void
 	 */
-	public function setNames(DatabaseNames $names): void
+	public function setNames($names): void
 	{
+		if (!is_a($names, DatabaseName::class)) {
+			throw new RuntimeException('Invalid DatabaseNames provided to setNames()');
+		}
+
 		$this->names = $names;
 	}
 
