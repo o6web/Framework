@@ -2,11 +2,9 @@
 
 namespace O6\Framework\Services\PDO;
 
-abstract class DatabaseNames
+class DatabaseNames
 {
 	protected array $data = [];
-
-	abstract public function __construct();
 
 	public function isDefined(string $name): bool
 	{
