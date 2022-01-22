@@ -13,11 +13,11 @@ use RuntimeException;
  */
 class Statement extends PDOStatement
 {
-	protected $pdo;
-	private $_inputParameters = [];
-	private $_expectedParameters = [];
-	private $executeResponse;
-	private $isFetchFriendly;
+	protected PDO $pdo;
+	private array $_inputParameters = [];
+	private array $_expectedParameters = [];
+	private bool $executeResponse;
+	private bool $isFetchFriendly;
 
 	/**
 	 * o6PDOStatement constructor.
@@ -56,17 +56,17 @@ class Statement extends PDOStatement
 	 * @param int|string|null|array $value
 	 * @param int $type
 	 * @param int $null_opt
-	 * @param int $length
+	 * @param ?int $length
 	 * @return bool
 	 */
 	public function bindValue(
 		$param,
 		$value,
 		$type = PDO::PARAM_STR,
-		$null_opt = PDO::NULL_OPT_NONE,
-		$length = null
+		int $null_opt = PDO::NULL_OPT_NONE,
+		?int $length = null
 	): ?bool {
-		if ((is_array($value)) AND (count($value) === 1)) {
+		if ((is_array($value)) && (count($value) === 1)) {
 			$value = $value[0];
 		}
 		// IF WE'RE SENDING IN AN ARRAY, LOOP THROUGH THEM
@@ -99,22 +99,20 @@ class Statement extends PDOStatement
 		}
 
 		if ($type === PDO::PARAM_INT) {
-			if (((int)$value === 0) AND ($null_opt === PDO::NULL_OPT_FORCE)) {
+			if (((int)$value === 0) && ($null_opt === PDO::NULL_OPT_FORCE)) {
 				$value = null;
 				$type = PDO::PARAM_NULL;
-			} elseif (($value === null) AND ($null_opt === PDO::NULL_OPT_DISALLOW)) {
+			} elseif (($value === '') || (($value === null) && ($null_opt === PDO::NULL_OPT_DISALLOW))) {
 				$value = 0;
-			} elseif ($value === '') {
-				$value = 0;
-			} elseif ($value !== '') {
+			} else {
 				$value = (int)$value;
 			}
 		} elseif ($type === PDO::PARAM_STR) {
-			if (($null_opt === PDO::NULL_OPT_FORCE) AND ($value === '')) {
+			if (($null_opt === PDO::NULL_OPT_FORCE) && ($value === '')) {
 				$value = null;
-			} elseif (($null_opt === PDO::NULL_OPT_DISALLOW) AND ($value === null)) {
+			} elseif (($null_opt === PDO::NULL_OPT_DISALLOW) && ($value === null)) {
 				$value = '';
-			} elseif (($length) AND ($value !== null)) {
+			} elseif (($length) && ($value !== null)) {
 				$value = substr($value, 0, $length);
 			}
 
@@ -181,13 +179,13 @@ class Statement extends PDOStatement
 	}
 
 	/**
-	 * Return all of the rows of a single column as an array
+	 * Return all rows of a single column as an array
 	 *
 	 * @param string|int $key
-	 * @param array $output
+	 * @param ?array $output
 	 * @return array
 	 */
-	public function fetchColumnAll($key = null, $output = null): array
+	public function fetchColumnAll($key = null, ?array $output = null): array
 	{
 		if (!is_array($output)) {
 			$output = [];
@@ -212,7 +210,7 @@ class Statement extends PDOStatement
 	 * @param string|integer $value_field
 	 * @return array
 	 */
-	public function fetchAllKeyed($key_field, $remove_key = false, $return_array = true, $value_field = ''): array
+	public function fetchAllKeyed($key_field, bool $remove_key = false, bool $return_array = true, $value_field = ''): array
 	{
 		if (!is_array($key_field)) {
 			$key_field = [$key_field];

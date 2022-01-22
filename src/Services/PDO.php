@@ -3,9 +3,11 @@
 namespace O6\Framework\Services;
 
 use Exception;
+use O6\Framework\Services\PDO\DatabaseNames;
 use O6\Framework\Services\PDO\Statement;
 use O6\Logging\Logger;
 use PDOException;
+use RuntimeException;
 
 /**
  * O6 PDO database connection class
@@ -17,12 +19,13 @@ class PDO extends \PDO
 	public const NULL_OPT_FORCE = 1;
 	public const NULL_OPT_DISALLOW = 2;
 
-	public $hasError = 0;
-	public $logger;
-	protected $_transactionDepth = 0;
-	private $_database;
-	private $_param = [];
-	private $prepareCache = [];
+	public int $hasError = 0;
+	public Logger $logger;
+	protected int $_transactionDepth = 0;
+	private string $_database;
+	private array $_param = [];
+	private array $prepareCache = [];
+	public ?DatabaseNames $names;
 
 	/**
 	 * O6\Framework\Services\PDO constructor
@@ -36,7 +39,7 @@ class PDO extends \PDO
 	public function __construct(string $dsn, string $username, string $passwd, Logger $logger, array $options = [])
 	{
 		parent::__construct($dsn, $username, $passwd, $options);
-		$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, ['\O6\Framework\Services\PDO\Statement', [$this]]);
+		$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [Statement::class, [$this]]);
 
 		// PULL THE INITIAL DB OUT OF THE DSN, IF THERE IS ONE
 		$dsn_parts = $this->getDsnParts($dsn);
@@ -49,6 +52,17 @@ class PDO extends \PDO
 	}
 
 	/**
+	 *
+	 *
+	 * @param DatabaseNames $names
+	 * @return void
+	 */
+	public function setNames(DatabaseNames $names): void
+	{
+		$this->names = $names;
+	}
+
+	/**
 	 * Start a new transaction or adjust savepoint level as needed
 	 *
 	 * @return bool|void
@@ -56,11 +70,14 @@ class PDO extends \PDO
 	public function beginTransaction()
 	{
 		if ($this->_transactionDepth === 0) {
-			parent::beginTransaction();
-		} else {
-			$this->exec('SAVEPOINT LEVEL' . $this->_transactionDepth);
+			$return = parent::beginTransaction();
+			if ($return) {
+				$this->_transactionDepth++;
+			}
+			return $return;
 		}
 
+		$this->exec('SAVEPOINT LEVEL' . $this->_transactionDepth);
 		$this->_transactionDepth++;
 	}
 
@@ -74,15 +91,16 @@ class PDO extends \PDO
 		$this->_transactionDepth--;
 
 		if ($this->_transactionDepth === 0) {
-			if (($this->hasError) AND ($this->inTransaction())) {
+			if (($this->hasError) && ($this->inTransaction())) {
 				$this->hasError = 0;
 				$this->rollBack();
-			} else {
-				parent::commit();
+				return false;
 			}
-		} else {
-			$this->exec('RELEASE SAVEPOINT LEVEL' . $this->_transactionDepth);
+
+			return parent::commit();
 		}
+
+		$this->exec('RELEASE SAVEPOINT LEVEL' . $this->_transactionDepth);
 	}
 
 	/**
@@ -99,10 +117,10 @@ class PDO extends \PDO
 		$this->_transactionDepth--;
 
 		if ($this->_transactionDepth === 0) {
-			parent::rollBack();
-		} else {
-			$this->exec('ROLLBACK TO SAVEPOINT LEVEL' . $this->_transactionDepth);
+			return parent::rollBack();
 		}
+
+		$this->exec('ROLLBACK TO SAVEPOINT LEVEL' . $this->_transactionDepth);
 	}
 
 	/**
@@ -214,7 +232,7 @@ class PDO extends \PDO
 	 * @param int $mode
 	 * @return Statement|false
 	 */
-	public function run(string $statement, $mode = self::FETCH_ASSOC)
+	public function run(string $statement, int $mode = self::FETCH_ASSOC)
 	{
 		if (!in_array($mode, [self::FETCH_ASSOC, self::FETCH_NUM, self::FETCH_BOTH], true)) {
 			$msg = 'Invalid fetch mode defined';
@@ -243,8 +261,8 @@ class PDO extends \PDO
 	public function bindValue(
 		$parameter,
 		$value,
-		$data_type = self::PARAM_STR,
-		$null_opt = self::NULL_OPT_NONE
+		int $data_type = self::PARAM_STR,
+		int $null_opt = self::NULL_OPT_NONE
 	): void {
 		$this->_param[$parameter] = (object)[
 			'value' => $value,
@@ -254,7 +272,7 @@ class PDO extends \PDO
 	}
 
 	/**
-	 * Unbind the a parameter value from the connection
+	 * Unbind a parameter value from the connection
 	 *
 	 * @param int|string $parameter
 	 * @return bool
@@ -273,7 +291,11 @@ class PDO extends \PDO
 	 */
 	public function useDatabase(string $database): self
 	{
-		if ((($database !== $this->_database) AND ($database)) && $this->exec('USE ' . $database) !== false) {
+		if (($this->names !== null) && (!$this->names->isDefined($database))) {
+			throw new RuntimeException('Database `' . $database . '` is not configured');
+		}
+
+		if ((($database !== $this->_database) && ($database)) && $this->exec('USE ' . $database) !== false) {
 			$this->_database = $database;
 		}
 
@@ -300,7 +322,7 @@ class PDO extends \PDO
 	 * @param string|null $key
 	 * @return string
 	 */
-	public function buildInString($count, $key = null): string
+	public function buildInString($count, ?string $key = null): string
 	{
 		if (is_array($count)) {
 			$count = count($count);
