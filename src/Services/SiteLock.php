@@ -3,6 +3,7 @@
 namespace O6\Framework\Services;
 
 use InvalidArgumentException;
+use O6\Framework\Helpers\RequestHelper;
 
 class SiteLock
 {
@@ -35,7 +36,7 @@ class SiteLock
 			$lock_data = json_decode(file_get_contents($locking_file), false);
 
 			if ((!in_array($ip_address, $lock_data->allowed, true)) AND (!in_array('bypass_lock', $argv, true))) {
-				if (PHP_SAPI !== 'cli') {
+				if (RequestHelper::isWebRequest()) {
 					header(('Location: ' . $lock_data->redirect), true, (($lock_data->temporary) ? 301 : 307));
 				}
 				exit;
