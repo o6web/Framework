@@ -104,6 +104,8 @@ class Statement extends PDOStatement
 				$type = PDO::PARAM_NULL;
 			} elseif (($value === '') || (($value === null) && ($null_opt === PDO::NULL_OPT_DISALLOW))) {
 				$value = 0;
+			} elseif ($value === null) {
+				$type = PDO::PARAM_NULL;
 			} else {
 				$value = (int)$value;
 			}
