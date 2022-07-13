@@ -142,7 +142,7 @@ class Redirect
 			$query_string = substr($query_string, 0, -1);
 		}
 
-		$redirect = 'http' . (((!empty($_SERVER['HTTPS'])) AND ($_SERVER['HTTPS'] !== 'off')) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+		$redirect = 'http' . (((!empty($_SERVER['HTTPS'])) AND ($_SERVER['HTTPS'] !== 'off')) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . strtok($_SERVER['REQUEST_URI'], '?');
 
 		if ($query_string) {
 			$redirect .= '?' . $query_string;
