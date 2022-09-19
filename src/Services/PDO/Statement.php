@@ -181,6 +181,26 @@ class Statement extends PDOStatement
 	}
 
 	/**
+	 * Return the value of the first record of a specified column
+	 *
+	 * @param string|int $key
+	 * @return mixed
+	 */
+	public function fetchColumnValue($key = null)
+	{
+		$record = $this->fetch();
+		if (is_array($record)) {
+			if ($key === null) {
+				return reset($record);
+			}
+
+			return $record[$key] ?? null;
+		}
+
+		return null;
+	}
+
+	/**
 	 * Return all rows of a single column as an array
 	 *
 	 * @param string|int $key
