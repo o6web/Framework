@@ -1,12 +1,12 @@
 {
   "name": "o6web/framework",
   "description": "Framework for O6 Web Properties sites",
-  "version": "2.0.15",
+  "version": "2.0.16",
   "homepage": "https://www.o6web.net",
   "authors": [
     {
       "name": "Clark Rasmussen",
-      "homepage": "https://www.clarkrasmussen.com",
+      "homepage": "https://cjr.dev",
       "role": "Developer"
     }
   ],
