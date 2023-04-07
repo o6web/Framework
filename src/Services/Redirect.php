@@ -2,6 +2,8 @@
 
 namespace O6\Framework\Services;
 
+use cjrasmussen\Request\RequestHelpers;
+
 class Redirect
 {
 	private $url;
@@ -142,7 +144,7 @@ class Redirect
 			$query_string = substr($query_string, 0, -1);
 		}
 
-		$redirect = 'http' . (((!empty($_SERVER['HTTPS'])) AND ($_SERVER['HTTPS'] !== 'off')) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . strtok($_SERVER['REQUEST_URI'], '?');
+		$redirect = RequestHelpers::getRequestedUrl(false);
 
 		if ($query_string) {
 			$redirect .= '?' . $query_string;
