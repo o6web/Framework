@@ -1,7 +1,7 @@
 {
   "name": "o6web/framework",
   "description": "Framework for O6 Web Properties sites",
-  "version": "2.0.16",
+  "version": "2.0.17",
   "homepage": "https://www.o6web.net",
   "authors": [
     {
@@ -31,6 +31,7 @@
     "phpoffice/phpspreadsheet": "^1.6",
     "cjrasmussen/color": "^1.1",
     "cjrasmussen/image": "^1.0.0",
+    "cjrasmussen/request": "^1.0.0",
     "cjrasmussen/string": "^1.1",
     "shopblocks/php-ico": "^1.1"
   },
