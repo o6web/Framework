@@ -190,4 +190,28 @@ class WebRequest
 
 		return $html;
 	}
+
+	/**
+	 * Gets an external file's contents and mime type
+	 *
+	 * @param string $url
+	 * @return object{contents: string, mimeType: string}
+	 */
+	public static function getFileContentsAndMimeType(string $url): object
+	{
+		$contents = self::getFileContents($url);
+
+		$temp_file_path = tempnam(('/' . trim(sys_get_temp_dir(), '/') . '/'), 'o6tmp');
+		file_put_contents($temp_file_path, $contents);
+
+		exec("file -bi '" . $temp_file_path . "'", $output);
+		[$mime_type,] = explode(';', $output[0]);
+
+		unlink($temp_file_path);
+
+		return (object)[
+			'contents' => $contents,
+			'mimeType' => $mime_type,
+		];
+	}
 }
