@@ -33,10 +33,9 @@ class PDO extends \PDO
 	 * @param string $dsn
 	 * @param string $username
 	 * @param string $passwd
-	 * @param Logger|null $logger
 	 * @param array $options
 	 */
-	public function __construct(string $dsn, string $username, string $passwd, ?Logger $logger, array $options = [])
+	public function __construct(string $dsn, string $username, string $passwd, array $options = [])
 	{
 		parent::__construct($dsn, $username, $passwd, $options);
 		$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [Statement::class, [$this]]);
@@ -46,10 +45,6 @@ class PDO extends \PDO
 
 		if ($dsn_parts['dbname']) {
 			$this->useDatabase($dsn_parts['dbname']);
-		}
-
-		if ($logger) {
-			$this->logger = $logger;
 		}
 	}
 
