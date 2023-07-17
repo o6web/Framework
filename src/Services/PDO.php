@@ -20,7 +20,7 @@ class PDO extends \PDO
 	public const NULL_OPT_DISALLOW = 2;
 
 	public int $hasError = 0;
-	public Logger $logger;
+	public ?Logger $logger;
 	protected int $_transactionDepth = 0;
 	private string $_database = '';
 	private array $_param = [];
@@ -33,10 +33,10 @@ class PDO extends \PDO
 	 * @param string $dsn
 	 * @param string $username
 	 * @param string $passwd
-	 * @param Logger $logger
+	 * @param Logger|null $logger
 	 * @param array $options
 	 */
-	public function __construct(string $dsn, string $username, string $passwd, Logger $logger, array $options = [])
+	public function __construct(string $dsn, string $username, string $passwd, ?Logger $logger, array $options = [])
 	{
 		parent::__construct($dsn, $username, $passwd, $options);
 		$this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [Statement::class, [$this]]);
@@ -48,6 +48,13 @@ class PDO extends \PDO
 			$this->useDatabase($dsn_parts['dbname']);
 		}
 
+		if ($logger) {
+			$this->logger = $logger;
+		}
+	}
+
+	public function setLogger(Logger $logger): void
+	{
 		$this->logger = $logger;
 	}
 
@@ -139,7 +146,10 @@ class PDO extends \PDO
 			return parent::exec($statement);
 		} catch (Exception $e) {
 			$this->hasError = 1;
-			$this->logger->logException($e, $statement);
+
+			if ($this->logger) {
+				$this->logger->logException($e, $statement);
+			}
 		}
 
 		return false;
@@ -199,7 +209,10 @@ class PDO extends \PDO
 			return $stmt;
 		} catch (Exception $e) {
 			$this->hasError = 1;
-			$this->logger->logException($e, $query);
+
+			if ($this->logger) {
+				$this->logger->logException($e, $query);
+			}
 		}
 
 		return false;
@@ -220,7 +233,9 @@ class PDO extends \PDO
 			return parent::query($statement, $mode, $arg3, $ctorargs);
 		} catch (Exception $e) {
 			$this->hasError = 1;
-			$this->logger->logException($e, $statement);
+			if ($this->logger) {
+				$this->logger->logException($e, $statement);
+			}
 		}
 
 		return false;
@@ -239,8 +254,11 @@ class PDO extends \PDO
 	public function run(string $statement, int $mode = self::FETCH_ASSOC)
 	{
 		if (!in_array($mode, [self::FETCH_ASSOC, self::FETCH_NUM, self::FETCH_BOTH], true)) {
-			$msg = 'Invalid fetch mode defined';
-			$this->logger->logError(new Exception($msg));
+			if ($this->logger) {
+				$msg = 'Invalid fetch mode defined';
+				$this->logger->logError(new Exception($msg));
+			}
+
 			return false;
 		}
 
@@ -248,7 +266,10 @@ class PDO extends \PDO
 			return parent::query($statement, $mode);
 		} catch (Exception $e) {
 			$this->hasError = 1;
-			$this->logger->logException($e, $statement);
+
+			if ($this->logger) {
+				$this->logger->logException($e, $statement);
+			}
 		}
 
 		return false;
