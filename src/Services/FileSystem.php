@@ -103,4 +103,24 @@ class FileSystem
 		}
 		return $empty;
 	}
+
+	/**
+	 * Get the base of a WordPress upload file name
+	 *
+	 * Images uploaded to WP get resized with dimensions added to the file name. This gets the base name of such files.
+	 * For example, both "PXL_20230712_140220022.jpg" and "PXL_20230712_140220022-150x150.jpg" return
+	 * "PXL_20230712_140220022"
+	 *
+	 * @param string $filename
+	 * @return string
+	 */
+	public static function getWordpressUploadFileBase(string $filename): string
+	{
+		$pos = strrpos($filename, '-');
+		if (!$pos) {
+			$pos = strrpos($filename, '.');
+		}
+
+		return substr($filename, 0, $pos);
+	}
 }
