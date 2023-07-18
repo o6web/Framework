@@ -62,4 +62,45 @@ class FileSystem
 
 		return file_put_contents($path, $data);
 	}
+
+	/**
+	 * Deletes a file if it exists
+	 *
+	 * @param string $path
+	 * @return void
+	 */
+	public static function deleteFile(string $path): void
+	{
+		if (file_exists($path)) {
+			unlink($path);
+		}
+	}
+
+	/**
+	 * Delete any empty subdirectories under the provided path
+	 *
+	 * Taken from http://stackoverflow.com/questions/1833518/remove-empty-subfolders-with-php
+	 *
+	 * @param string $path
+	 * @param bool $is_root
+	 * @return bool
+	 */
+	public static function deleteEmptySubdirectories(string $path, bool $is_root = false): bool
+	{
+		$empty = true;
+		foreach (glob($path . DIRECTORY_SEPARATOR . '*') AS $file) {
+			if (is_dir($file)) {
+				if (!self::deleteEmptySubdirectories($file)) {
+					$empty = false;
+				}
+			} else {
+				$empty = false;
+			}
+		}
+
+		if (($empty) && (!$is_root)) {
+			rmdir($path);
+		}
+		return $empty;
+	}
 }
