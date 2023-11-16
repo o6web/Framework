@@ -13,9 +13,10 @@ class WebRequest
 	 * 15-20 times faster than file_gets_contents()
 	 *
 	 * @param string $url
+	 * @param bool $ignore_ssl_errors
 	 * @return string|bool
 	 */
-	public static function getFileContents(string $url)
+	public static function getFileContents(string $url, bool $ignore_ssl_errors = false)
 	{
 		$c = curl_init();
 		curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
@@ -23,6 +24,11 @@ class WebRequest
 		curl_setopt($c, CURLOPT_MAXREDIRS, 5);
 		curl_setopt($c, CURLOPT_HEADER, 1);
 		curl_setopt($c, CURLOPT_CONNECTTIMEOUT, 10);
+
+		if ($ignore_ssl_errors) {
+			curl_setopt($c, CURLOPT_SSL_VERIFYHOST, 0);
+			curl_setopt($c, CURLOPT_SSL_VERIFYPEER, 0);
+		}
 
 		$curl_error = curl_errno($c);
 		if ($curl_error) {
