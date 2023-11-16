@@ -62,10 +62,10 @@ class WebRequest
 			if (strpos($location, '/') === 0) {
 				$url_parts = parse_url($url);
 				$new_url = $url_parts['scheme'] . '://' . $url_parts['host'] . $location;
-				return self::getFileContents($new_url);
+				return self::getFileContents($new_url, $ignore_ssl_errors);
 			}
 
-			return self::getFileContents($location);
+			return self::getFileContents($location, $ignore_ssl_errors);
 		}
 
 		return false;
@@ -75,9 +75,10 @@ class WebRequest
 	 * Gets the header for a given page request using cURL
 	 *
 	 * @param string $url
+	 * @param bool $ignore_ssl_errors
 	 * @return array
 	 */
-	public static function getPageHeader(string $url): array
+	public static function getPageHeader(string $url, bool $ignore_ssl_errors = false): array
 	{
 		$c = curl_init();
 		curl_setopt($c, CURLOPT_URL, $url);
@@ -85,6 +86,12 @@ class WebRequest
 		curl_setopt($c, CURLOPT_NOBODY, true);
 		curl_setopt($c, CURLOPT_FOLLOWLOCATION, false);
 		curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
+
+		if ($ignore_ssl_errors) {
+			curl_setopt($c, CURLOPT_SSL_VERIFYHOST, 0);
+			curl_setopt($c, CURLOPT_SSL_VERIFYPEER, 0);
+		}
+
 		curl_exec($c);
 		$header = curl_getinfo($c);
 		curl_close($c);
@@ -156,16 +163,23 @@ class WebRequest
 	 * @param $url
 	 * @param string|null $cookie_source
 	 * @param array $headers
+	 * @param bool $ignore_ssl_errors
 	 * @return string
 	 * @throws Exception
 	 * @see https://stackoverflow.com/questions/895786/how-to-get-the-cookies-from-a-php-curl-into-a-variable
 	 */
-	public static function getFileContentsWithCookie($url, $cookie_source = null, $headers = []): string
+	public static function getFileContentsWithCookie($url, ?string $cookie_source = null, array $headers = [], bool $ignore_ssl_errors = false): string
 	{
 		// DO A REQUEST TO GET A SESSION COOKIE
 		$c = curl_init($cookie_source);
 		curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($c, CURLOPT_HEADER, 1);
+
+		if ($ignore_ssl_errors) {
+			curl_setopt($c, CURLOPT_SSL_VERIFYHOST, 0);
+			curl_setopt($c, CURLOPT_SSL_VERIFYPEER, 0);
+		}
+
 		$result = curl_exec($c);
 
 		preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $result, $matches);
@@ -191,6 +205,12 @@ class WebRequest
 		curl_setopt($c, CURLOPT_MAXREDIRS, 5);
 		curl_setopt($c, CURLOPT_HEADER, 0);
 		curl_setopt($c, CURLOPT_HTTPHEADER, $headers);
+
+		if ($ignore_ssl_errors) {
+			curl_setopt($c, CURLOPT_SSL_VERIFYHOST, 0);
+			curl_setopt($c, CURLOPT_SSL_VERIFYPEER, 0);
+		}
+
 		$html = curl_exec($c);
 		curl_close($c);
 
@@ -201,11 +221,12 @@ class WebRequest
 	 * Gets an external file's contents and mime type
 	 *
 	 * @param string $url
+	 * @param bool $ignore_ssl_errors
 	 * @return object{contents: string, mimeType: string}
 	 */
-	public static function getFileContentsAndMimeType(string $url): object
+	public static function getFileContentsAndMimeType(string $url, bool $ignore_ssl_errors = false): object
 	{
-		$contents = self::getFileContents($url);
+		$contents = self::getFileContents($url, $ignore_ssl_errors);
 
 		$temp_file_path = tempnam(('/' . trim(sys_get_temp_dir(), '/') . '/'), 'o6tmp');
 		file_put_contents($temp_file_path, $contents);
