@@ -18,7 +18,7 @@ class SiteConfig
 	 *
 	 * @return array
 	 */
-	protected function getConfigurationArray(): array
+	public function getConfigurationArray(): array
 	{
 		return $this->siteConfigArray;
 	}
@@ -29,7 +29,7 @@ class SiteConfig
 	 * @param string $path
 	 * @return array|mixed|null
 	 */
-	protected function getConfigurationValueByPath(string $path)
+	public function getConfigurationValueByPath(string $path)
 	{
 		$keys = explode('/', $path);
 
@@ -51,7 +51,7 @@ class SiteConfig
 	 * @param string|null $timezone
 	 * @return void
 	 */
-	protected function implementConfiguredTimezone(?string $timezone = null): void
+	public function implementConfiguredTimezone(?string $timezone = null): void
 	{
 		if (!$timezone) {
 			$timezone = $this->siteConfigArray['timezone'];
@@ -69,7 +69,7 @@ class SiteConfig
 	 *
 	 * @return string
 	 */
-	protected function getPathSiteRoot(): string
+	public function getPathSiteRoot(): string
 	{
 		return $this->siteConfigArray['path']['sites_root'];
 	}
@@ -79,7 +79,7 @@ class SiteConfig
 	 *
 	 * @return string
 	 */
-	protected function getPathBackups(): string
+	public function getPathBackups(): string
 	{
 		return $this->siteConfigArray['path']['backup_directory'];
 	}
@@ -89,7 +89,7 @@ class SiteConfig
 	 *
 	 * @return string
 	 */
-	protected function getPathTemporary(): string
+	public function getPathTemporary(): string
 	{
 		return $this->siteConfigArray['path']['transfer_absolute'];
 	}
@@ -99,7 +99,7 @@ class SiteConfig
 	 *
 	 * @return string
 	 */
-	protected function getPathPhpCli(): string
+	public function getPathPhpCli(): string
 	{
 		return $this->siteConfigArray['path']['php_cli'];
 	}
@@ -109,7 +109,7 @@ class SiteConfig
 	 *
 	 * @return string
 	 */
-	protected function getDatabaseHost(): string
+	public function getDatabaseHost(): string
 	{
 		return $this->siteConfigArray['db']['host'];
 	}
@@ -119,7 +119,7 @@ class SiteConfig
 	 *
 	 * @return string
 	 */
-	protected function getDatabaseDsn(): string
+	public function getDatabaseDsn(): string
 	{
 		return $this->siteConfigArray['db']['dsn'];
 	}
@@ -129,7 +129,7 @@ class SiteConfig
 	 *
 	 * @return array
 	 */
-	protected function getDatabaseConnectionOpts(): array
+	public function getDatabaseConnectionOpts(): array
 	{
 		return $this->siteConfigArray['db']['opts'];
 	}
@@ -139,7 +139,7 @@ class SiteConfig
 	 *
 	 * @return string
 	 */
-	protected function getUrlDashboard(): string
+	public function getUrlDashboard(): string
 	{
 		return $this->siteConfigArray['url']['o6_dashboard'];
 	}
@@ -149,7 +149,7 @@ class SiteConfig
 	 *
 	 * @return string
 	 */
-	protected function getTimezone(): string
+	public function getTimezone(): string
 	{
 		return $this->siteConfigArray['timezone'];
 	}
@@ -159,7 +159,7 @@ class SiteConfig
 	 *
 	 * @return object
 	 */
-	protected function getDebugTraceHandlingOptions(): object
+	public function getDebugTraceHandlingOptions(): object
 	{
 		return (object)$this->siteConfigArray['trace_handling'];
 	}
