@@ -6,7 +6,7 @@ use RuntimeException;
 
 class SiteConfig
 {
-	private array $siteConfigArray;
+	protected array $siteConfigArray;
 
 	public function __construct(array $config)
 	{
