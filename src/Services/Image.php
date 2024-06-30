@@ -1,12 +1,11 @@
 <?php
+
 namespace O6\Framework\Services;
 
-use cjrasmussen\Color\Convert;
 use cjrasmussen\Image\Resize;
 use O6\Logging\Logger;
 use O6\Logging\TraceHandler;
 use Ossobuffo\PhpIco\IcoConverter;
-use RuntimeException;
 use ZipArchive;
 
 /**
