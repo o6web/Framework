@@ -24,6 +24,31 @@ class SiteConfig
 	}
 
 	/**
+	 * Add an element to the configuration array
+	 *
+	 * @param string $key
+	 * @param string|int|array $value
+	 * @return void
+	 */
+	public function setConfigurationValue(string $key, $value): void
+	{
+		$this->siteConfigArray[$key] = $value;
+	}
+
+	/**
+	 * Add an array of elements to the configuration array
+	 *
+	 * @param array $values
+	 * @return void
+	 */
+	public function mergeConfigurationValues(array $values): void
+	{
+		foreach ($values AS $key => $value) {
+			$this->setConfigurationValue($key, $value);
+		}
+	}
+
+	/**
 	 *
 	 *
 	 * @param string $path
