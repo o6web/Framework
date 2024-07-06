@@ -2,23 +2,17 @@
 
 namespace O6\Framework\Services;
 
-use InvalidArgumentException;
-use cjrasmussen\Request\RequestHelpers;
+use cjrasmussen\Request\RequestData;
 
 class SiteLock
 {
-	private $config;
+	private SiteConfig $siteConfig;
+	private RequestData $requestData;
 
-	/**
-	 * @param array|null $config
-	 */
-	public function __construct($config = null)
+	public function __construct(SiteConfig $siteConfig, RequestData $requestData)
 	{
-		if (!$config) {
-			throw new InvalidArgumentException('Configuration array must be provided.');
-		}
-
-		$this->config = $config;
+		$this->siteConfig = $siteConfig;
+		$this->requestData = $requestData;
 	}
 
 	/**
@@ -28,15 +22,15 @@ class SiteLock
 	{
 		global $argv;
 
-		$locking_file = $this->config['path']['main_document'] . '__lock/lock.json';
+		$locking_file = $this->siteConfig->getPathMainDocument() . '__lock/lock.json';
 
 		if (file_exists($locking_file)) {
-			$ip_address = $_SERVER['REMOTE_ADDR'] ?: gethostbyname(parse_url($this->config['url']['home'], PHP_URL_HOST));
+			$ip_address = $this->requestData->server->has('REMOTE_ADDR') ? $this->requestData->server->get('REMOTE_ADDR') : gethostbyname(parse_url($this->siteConfig->getUrlHome(), PHP_URL_HOST));
 
-			$lock_data = json_decode(file_get_contents($locking_file), false);
+			$lock_data = json_decode(file_get_contents($locking_file), false, 512, JSON_THROW_ON_ERROR);
 
-			if ((!in_array($ip_address, $lock_data->allowed, true)) AND (!in_array('bypass_lock', $argv, true))) {
-				if (RequestHelpers::isWebRequest()) {
+			if ((!in_array($ip_address, $lock_data->allowed, true)) && (!in_array('bypass_lock', $argv, true))) {
+				if ($this->requestData->isWebRequest()) {
 					header(('Location: ' . $lock_data->redirect), true, (($lock_data->temporary) ? 301 : 307));
 				}
 				exit;

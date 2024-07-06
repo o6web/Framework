@@ -2,17 +2,23 @@
 
 namespace O6\Framework\Services;
 
-use cjrasmussen\Request\RequestHelpers;
+use cjrasmussen\Request\RequestData;
 
 class Redirect
 {
-	private $url;
-	private $http_code = 301;
+	private RequestData $requestData;
+	private string $url;
+	private int $httpCode = 301;
+
+	public function __construct(RequestData $requestData)
+	{
+		$this->requestData = $requestData;
+	}
 
 	public function execute(): void
 	{
 		if ($this->url) {
-			header(('Location: ' . $this->url), false, $this->http_code);
+			header(('Location: ' . $this->url), false, $this->httpCode);
 			exit;
 		}
 	}
@@ -26,19 +32,21 @@ class Redirect
 	 */
 	public function cleanQueryString(): self
 	{
-		if ((!$_GET['clean']) OR (!count($_GET))) {
+		$get = $this->requestData->query->all();
+
+		if ((!$get['clean']) || (!count($get))) {
 			// NOT CLEANABLE, GET OUT
 			return $this;
 		}
 
 		$query_string = '';
 
-		if ($_GET['date'] AND (($_GET['date1']) OR ($_GET['date2']))) {
-			if ($_GET['date_type'] === 'range') {
-				unset($_GET['date']);
+		if ($get['date'] && (($get['date1']) || ($get['date2']))) {
+			if ($get['date_type'] === 'range') {
+				unset($get['date']);
 			} else {
-				unset($_GET['date1']);
-				unset($_GET['date2']);
+				unset($get['date1']);
+				unset($get['date2']);
 			}
 		}
 
@@ -46,8 +54,8 @@ class Redirect
 			'date_type',
 		];
 
-		if ($_GET['arr']) {
-			[$array_name, $array_items] = explode('_', $_GET['arr']);
+		if ($get['arr']) {
+			[$array_name, $array_items] = explode('_', $get['arr']);
 
 			$array_str = '';
 			$array_used = 0;
@@ -56,8 +64,8 @@ class Redirect
 				$field = $array_name . $n;
 				$ignore[] = $field;
 
-				if ($_GET[$field]) {
-					$array_str .= $array_name . '[]=' . $_GET[$field] . '&';
+				if ($get[$field]) {
+					$array_str .= $array_name . '[]=' . $get[$field] . '&';
 					$array_used++;
 				}
 			}
@@ -69,14 +77,16 @@ class Redirect
 			$ignore[] = 'arr';
 		}
 
-		foreach ($_GET AS $key => $val) {
-			$val = trim($val);
+		foreach ($get AS $key => $val) {
+			if ($val !== null) {
+				$val = trim($val);
+			}
 
-			if (($val !== null) AND ($val !== '') AND (!in_array($key, $ignore, true))) {
+			if (($val !== null) && ($val !== '') && (!in_array($key, $ignore, true))) {
 				if (false !== strpos($key, 'month')) {
 					if ($key === 'month') {
-						if ($_GET['year']) {
-							$date = $_GET['year'] . '-' . $_GET['month'] . '-' . $_GET['day'];
+						if ($get['year']) {
+							$date = $get['year'] . '-' . $get['month'] . '-' . $get['day'];
 							$ignore[] = 'year';
 							$ignore[] = 'month';
 							$ignore[] = 'day';
@@ -86,21 +96,23 @@ class Redirect
 							$query_string .= $key . '=' . $val . '&';
 						}
 					} else {
-						if ($_GET['year1']) {
-							$date1 = $_GET['year1'] . '-' . $_GET['month1'] . '-' . $_GET['day1'];
+						$date1 = $date2 = null;
+
+						if ($get['year1']) {
+							$date1 = $get['year1'] . '-' . $get['month1'] . '-' . $get['day1'];
 							$ignore[] = 'year1';
 							$ignore[] = 'month1';
 							$ignore[] = 'day1';
 						}
 
-						if ($_GET['year2']) {
-							$date2 = $_GET['year2'] . '-' . $_GET['month2'] . '-' . $_GET['day2'];
+						if ($get['year2']) {
+							$date2 = $get['year2'] . '-' . $get['month2'] . '-' . $get['day2'];
 							$ignore[] = 'year2';
 							$ignore[] = 'month2';
 							$ignore[] = 'day2';
 						}
 
-						if (($date1) AND ($date2)) {
+						if (($date1) && ($date2)) {
 							if ($date1 === $date2) {
 								$query_string .= 'date=' . $date1 . '&';
 							} else {
@@ -112,21 +124,21 @@ class Redirect
 						}
 					}
 				} elseif (false !== strpos($key, 'date')) {
-					if (($_GET['date1']) AND ($_GET['date2'])) {
-						if ($_GET['date1'] === $_GET['date2']) {
-							$query_string .= 'date=' . $_GET['date1'] . '&';
+					if (($get['date1']) && ($get['date2'])) {
+						if ($get['date1'] === $get['date2']) {
+							$query_string .= 'date=' . $get['date1'] . '&';
 						} else {
-							$query_string .= 'date1=' . $_GET['date1'] . '&';
-							$query_string .= 'date2=' . $_GET['date2'] . '&';
+							$query_string .= 'date1=' . $get['date1'] . '&';
+							$query_string .= 'date2=' . $get['date2'] . '&';
 						}
 
 						$ignore[] = 'date1';
 						$ignore[] = 'date2';
-					} elseif (($_GET['date1']) OR ($_GET['date2'])) {
-						if ($_GET['date1']) {
-							$query_string .= 'date=' . $_GET['date1'] . '&';
+					} elseif (($get['date1']) || ($get['date2'])) {
+						if ($get['date1']) {
+							$query_string .= 'date=' . $get['date1'] . '&';
 						} else {
-							$query_string .= 'date=' . $_GET['date2'] . '&';
+							$query_string .= 'date=' . $get['date2'] . '&';
 						}
 
 						$ignore[] = 'date1';
@@ -144,14 +156,14 @@ class Redirect
 			$query_string = substr($query_string, 0, -1);
 		}
 
-		$redirect = RequestHelpers::getRequestedUrl(false);
+		$redirect = $this->requestData->getRequestedUrl(false);
 
 		if ($query_string) {
 			$redirect .= '?' . $query_string;
 		}
 
 		$this->url = $redirect;
-		$this->http_code = 301;
+		$this->httpCode = 301;
 
 		return $this;
 	}

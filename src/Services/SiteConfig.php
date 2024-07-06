@@ -4,7 +4,7 @@ namespace O6\Framework\Services;
 
 use RuntimeException;
 
-class SiteConfig
+abstract class SiteConfig
 {
 	protected array $siteConfigArray;
 
@@ -188,4 +188,12 @@ class SiteConfig
 	{
 		return (object)$this->siteConfigArray['trace_handling'];
 	}
+
+	abstract public function getSiteName(): string;
+
+	abstract public function getUrlHome(): string;
+
+	abstract public function getPathMainDocument(): string;
+
+	abstract public function getRootDomain(): string;
 }
