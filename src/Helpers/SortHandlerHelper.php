@@ -2,24 +2,18 @@
 
 namespace O6\Framework\Helpers;
 
-use cjrasmussen\Request\RequestData;
-use O6\Framework\Services\SiteConfig;
-
 class SortHandlerHelper
 {
-	private SiteConfig $siteConfig;
-	private RequestData $requestData;
-	private array $sessionData;
+	private array $saltItems;
 	private string $salt = '';
 
-	public function __construct(SiteConfig $siteConfig, RequestData $requestData, array $session_data = [])
+	public function __construct(array $saltItems = [])
 	{
-		$this->siteConfig = $siteConfig;
-		$this->requestData = $requestData;
-		$this->sessionData = $session_data;
+		$this->saltItems = $saltItems;
 	}
 
 	public function initialize(): self {
+		$this->saltItems[uniqid(self::class, true)] = time();
 		$this->salt = $this->generateSalt();
 		return $this;
 	}
@@ -33,6 +27,7 @@ class SortHandlerHelper
 	public function dataEncode(array $data): string
 	{
 		$string = json_encode($data, JSON_THROW_ON_ERROR);
+		$string = base64_encode($string);
 		$string = $this->salt . $string . $this->salt;
 		return base64_encode($string);
 	}
@@ -48,6 +43,7 @@ class SortHandlerHelper
 		$salt_length = strlen($this->salt);
 		$string = base64_decode($string);
 		$string = substr($string, $salt_length, ($salt_length * -1));
+		$string = base64_decode($string);
 		return json_decode($string, true, 512, JSON_THROW_ON_ERROR);
 	}
 
@@ -60,7 +56,7 @@ class SortHandlerHelper
 	 */
 	private function generateSalt(): string
 	{
-		$string = $this->siteConfig->getSiteName() . json_encode($this->sessionData, JSON_THROW_ON_ERROR) . $this->requestData->server->get('REMOTE_ADDR') . $this->siteConfig->getRootDomain() . $this->requestData->server->get('HTTP_USER_AGENT');
+		$string = json_encode($this->saltItems, JSON_THROW_ON_ERROR);
 		return sha1($string);
 	}
 }
