@@ -7,7 +7,7 @@ use cjrasmussen\Request\RequestData;
 class Redirect
 {
 	private RequestData $requestData;
-	private string $url;
+	private ?string $url = null;
 	private int $httpCode = 301;
 
 	public function __construct(RequestData $requestData)
