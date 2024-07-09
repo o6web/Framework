@@ -189,7 +189,7 @@ class PDO extends \PDO
 		try {
 			// CHECK TO SEE IF WE'VE ALREADY PREPARED THIS AND, IF SO, USE IT
 			$cache_key = md5(var_export($query, true) . var_export($options, true) . var_export($this->_database, true));
-			if ($this->prepareCache[$cache_key]) {
+			if (array_key_exists($cache_key, $this->prepareCache)) {
 				/* @var PDO\Statement $stmt */
 				$stmt = $this->prepareCache[$cache_key];
 			} else {
