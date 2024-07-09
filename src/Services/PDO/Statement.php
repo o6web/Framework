@@ -89,7 +89,7 @@ class Statement extends PDOStatement
 		}
 
 		// IF WE EXPECT MORE THAN ONE, LOOP THROUGH TO ASSIGN THE VALUE EVERYWHERE NEEDED
-		if ($this->_expectedParameters[$param] > 1) {
+		if ((array_key_exists($param, $this->_expectedParameters)) && ($this->_expectedParameters[$param] > 1)) {
 			$result = false;
 			for ($n = 1; $n <= $this->_expectedParameters[$param]; $n++) {
 				$result = $this->bindValue(($param . $n), $value, $type, $null_opt, $length);
