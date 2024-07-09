@@ -43,7 +43,7 @@ class PDO extends \PDO
 		// PULL THE INITIAL DB OUT OF THE DSN, IF THERE IS ONE
 		$dsn_parts = $this->getDsnParts($dsn);
 
-		if ($dsn_parts['dbname']) {
+		if (array_key_exists('dbname', $dsn_parts)) {
 			$this->useDatabase($dsn_parts['dbname']);
 		}
 	}
@@ -168,7 +168,12 @@ class PDO extends \PDO
 		preg_match_all('/:[^%]\\D\\w*/', $query, $matches);
 
 		foreach ($matches[0] AS $match) {
-			$expected[substr($match, 1)]++;
+			$key = substr($match, 1);
+			if (array_key_exists($key, $expected)) {
+				$expected[$key]++;
+			} else {
+				$expected[$key] = 1;
+			}
 		}
 
 		foreach ($expected AS $key => $count) {
@@ -195,7 +200,7 @@ class PDO extends \PDO
 			$stmt->setExpectedParameters($expected);
 
 			foreach ($expected AS $key => $count) {
-				if ($this->_param[$key]) {
+				if (array_key_exists($key, $this->_param)) {
 					$stmt->bindValue($key, $this->_param[$key]->value, $this->_param[$key]->data_type,
 						$this->_param[$key]->null_opt);
 				}
