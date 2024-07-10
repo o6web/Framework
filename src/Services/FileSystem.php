@@ -22,7 +22,7 @@ class FileSystem
 
 		try {
 			$recursiveDirectoryIterator = new RecursiveDirectoryIterator($path);
-			$recursiveIteratorIterator = new RecursiveIteratorIterator($recursiveDirectoryIterator);
+			$recursiveIteratorIterator = new RecursiveIteratorIterator($recursiveDirectoryIterator, RecursiveIteratorIterator::LEAVES_ONLY, RecursiveIteratorIterator::CATCH_GET_CHILD);
 		} catch (Exception $e) {
 			return [];
 		}
