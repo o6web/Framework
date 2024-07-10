@@ -3,6 +3,7 @@
 namespace O6\Framework\Services;
 
 use cjrasmussen\String\Strings;
+use Exception;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
@@ -12,23 +13,29 @@ class FileSystem
 	 * Get a recursive directory listing
 	 *
 	 * @param string $path
-	 * @param string $search - must appear in the file name
+	 * @param string|null $search - must appear in the file name
 	 * @return array
 	 */
-	public static function scanDirRecursive(string $path, $search = ''): array
+	public static function scanDirRecursive(string $path, ?string $search = null): array
 	{
 		$files = [];
 
-		$dir = new RecursiveDirectoryIterator($path);
-		foreach (new RecursiveIteratorIterator($dir) AS $file) {
+		try {
+			$recursiveDirectoryIterator = new RecursiveDirectoryIterator($path);
+			$recursiveIteratorIterator = new RecursiveIteratorIterator($recursiveDirectoryIterator);
+		} catch (Exception $e) {
+			return [];
+		}
+
+		foreach ($recursiveIteratorIterator AS $file) {
 			$filename = $file->getPath() . '/' . $file->getFilename();
 
-			if ((substr($filename, -1) === '.') OR (substr($filename, -1) === '/')) {
+			if ((substr($filename, -1) === '.') || (substr($filename, -1) === '/')) {
 				// SKIP IF THE FILE ENDS IN A DOT OR A SLASH
 				continue;
 			}
 
-			if (Strings::strContains($filename, $search)) {
+			if (($search === null) || (Strings::strContains($filename, $search))) {
 				$files[] = $filename;
 			}
 		}
