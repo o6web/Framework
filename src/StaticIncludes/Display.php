@@ -162,14 +162,14 @@ class Display
 		?>
 		<script type="text/javascript">
 			if (typeof ROOT_URL === 'undefined' || ROOT_URL === null) {
-				var ROOT_URL = '/';
+				let ROOT_URL = '/';
 			}
 
 			$(document).ready(function () {
 				<?php
 				}
 				?>
-				var $autocomplete = $('input.autocomplete');
+				let $autocomplete = $('input.autocomplete');
 				$autocomplete.autocomplete({
 					source: function (request, response) {
 						$.ajax({
@@ -179,16 +179,16 @@ class Display
 								a: $(this.element).attr('data-autocomplete-additional')
 							},
 							success: function (data) {
-								var results = $.ui.autocomplete.filter(data, request.term);
+								let results = $.ui.autocomplete.filter(data, request.term);
 								response(results.slice(0, 10));
 							}
 						});
 					}
 				}).dblclick(function () {
 					if (!$(this).attr('data-autocomplete-norefresh')) {
-						var el = this;
-						var spinner_id = ($(el).attr('id') + '_spinner');
-						var spinner = $('<div><i class="fas fa-spinner fa-pulse fa-fw"></i></div>').attr('id', spinner_id);
+						let el = this;
+						let spinner_id = ($(el).attr('id') + '_spinner');
+						let spinner = $('<div><i class="fas fa-spinner fa-pulse fa-fw"></i></div>').attr('id', spinner_id);
 						$(el).after($(spinner));
 
 						$(spinner).css({
@@ -262,7 +262,7 @@ class Display
 			?>
 			$('.<?=$class ?>').click(function (e) {
 				e.preventDefault();
-				var targetUrl = $(this).attr('href');
+				let targetUrl = $(this).attr('href');
 
 				$('#<?=$dialog_name ?>').dialog({
 					buttons: {
