@@ -3,8 +3,6 @@
 namespace O6\Framework\Services;
 
 use cjrasmussen\Image\Resize;
-use O6\Logging\Logger;
-use O6\Logging\TraceHandler;
 use Ossobuffo\PhpIco\IcoConverter;
 use ZipArchive;
 
@@ -95,7 +93,7 @@ class Image
 			[$width, $height] = getimagesize($src_path);
 			$size = ($width > $height) ? $width : $height;
 
-			$img = static::resize($src_path, 'png', $size, $size);
+			$img = Resize::resize($src_path, 'png', $size, $size);
 			imagepng($img, $tmp_dst);
 			imagedestroy($img);
 
