@@ -80,7 +80,7 @@ class Image
 				$files[] = $info['prefix'] . '-' . str_pad($size, 3, '0', STR_PAD_LEFT) . '.png';
 				$path = $tmp_path . $info['prefix'] . '-' . str_pad($size, 3, '0', STR_PAD_LEFT) . '.png';
 
-				$img = static::resize($src_path, 'png', $size, $size, (($info['use_bg']) ? $bg_color : ''),
+				$img = Resize::resize($src_path, 'png', $size, $size, (($info['use_bg']) ? $bg_color : ''),
 					$info['rounded'], $gutter);
 				imagepng($img, $path);
 				imagedestroy($img);
