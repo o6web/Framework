@@ -6,7 +6,7 @@ use Exception;
 use ReflectionClass;
 use ReflectionException;
 
-class BaseModel
+abstract class BaseModel
 {
 	protected array $propertyNotHydrated = [];
 	protected array $propertyHydrationIgnored = [
