@@ -143,7 +143,7 @@ class PDO extends \PDO
 			$this->hasError = 1;
 
 			if ($this->log) {
-				$this->log->addCritical('Statement could not be executed', [
+				$this->log->critical('Statement could not be executed', [
 					'statement' => $statement,
 					'exception' => $e,
 				]);
@@ -214,7 +214,7 @@ class PDO extends \PDO
 			$this->hasError = 1;
 
 			if ($this->log) {
-				$this->log->addCritical('Statement could not be prepared', [
+				$this->log->critical('Statement could not be prepared', [
 					'statement' => $stmt,
 					'exception' => $e,
 				]);
@@ -240,7 +240,7 @@ class PDO extends \PDO
 		} catch (Exception $e) {
 			$this->hasError = 1;
 			if ($this->log) {
-				$this->log->addCritical('Statement could not be executed', [
+				$this->log->critical('Statement could not be executed', [
 					'statement' => $statement,
 					'exception' => $e,
 				]);
@@ -264,7 +264,7 @@ class PDO extends \PDO
 	{
 		if (!in_array($mode, [self::FETCH_ASSOC, self::FETCH_NUM, self::FETCH_BOTH], true)) {
 			if ($this->log) {
-				$this->log->addError('Invalid fetch mode defined', [
+				$this->log->error('Invalid fetch mode defined', [
 					'mode' => $mode,
 				]);
 			}
@@ -278,7 +278,7 @@ class PDO extends \PDO
 			$this->hasError = 1;
 
 			if ($this->log) {
-				$this->log->addCritical('Statement could not be executed', [
+				$this->log->critical('Statement could not be executed', [
 					'statement' => $statement,
 					'exception' => $e,
 				]);
