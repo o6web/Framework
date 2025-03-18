@@ -1,7 +1,7 @@
 {
   "name": "o6web/framework",
   "description": "Framework for O6 Web Properties sites",
-  "version": "3.3.0",
+  "version": "4.0.0",
   "homepage": "https://www.o6web.net",
   "authors": [
     {
@@ -13,13 +13,6 @@
   "config":{
     "cache-files-ttl":0
   },
-  "repositories": [
-    {
-      "name": "o6web/logging",
-      "type": "vcs",
-      "url": "git@bitbucket.org:o6web/Logging.git"
-    }
-  ],
   "require": {
     "php": ">=7.3.0",
     "ext-curl": "*",
@@ -27,11 +20,11 @@
     "ext-json": "*",
     "ext-pdo": "*",
     "ext-zip": "*",
-    "o6web/logging": "^3.0.0",
     "phpoffice/phpspreadsheet": "^1.6",
     "cjrasmussen/image": "^2.2",
     "cjrasmussen/request": "^2.0.0",
     "cjrasmussen/string": "^1.1",
+    "monolog/monolog": "^2.10",
     "shopblocks/php-ico": "^1.1"
   },
   "require-dev": {

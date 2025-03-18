@@ -3,9 +3,9 @@
 namespace O6\Framework\Services\PDO;
 
 use Exception;
+use Monolog\Logger;
 use O6\Framework\Services\PDO;
 use PDOStatement;
-use RuntimeException;
 
 /**
  * O6 PDO Statement class
@@ -133,8 +133,14 @@ class Statement extends PDOStatement
 		} catch (Exception $e) {
 			$this->pdo->hasError = 1;
 
-			if ($this->pdo->logger) {
-				$this->pdo->logger->logException($e, $this->debugDumpParams());
+			if ($this->pdo->log) {
+				$this->pdo->log->addException('Value could not be bound', [
+					'parameter' => $param,
+					'value' => $value,
+					'type' => $type,
+					'exception' => $e,
+					'debug' => $this->debugDumpParams(),
+				]);
 			}
 
 			return false;
@@ -154,17 +160,23 @@ class Statement extends PDOStatement
 		} catch (Exception $e) {
 			$this->pdo->hasError = 1;
 
-			if ($this->pdo->logger) {
-				$this->pdo->logger->logException($e, $this->debugDumpParams(), $this->_inputParameters);
+			if ($this->pdo->log) {
+				$this->pdo->log->addException('Statement could not be executed', [
+					'exception' => $e,
+					'debug' => $this->debugDumpParams(),
+					'input' => $this->_inputParameters,
+				]);
 			}
 
 			return false;
 		}
 
-		if ((!$this->executeResponse) && ($this->pdo->logger)) {
-			$msg = 'Prepared statement could not be executed' . "\n";
-			$msg .= print_r($this->errorInfo(), true);
-			$this->pdo->logger->logException((new Exception(trim($msg))), $this->debugDumpParams(), $this->_inputParameters);
+		if ((!$this->executeResponse) && ($this->pdo->log)) {
+			$this->pdo->log->addException('Prepared statement could not be executed', [
+				'error' => $this->errorInfo(),
+				'debug' => $this->debugDumpParams(),
+				'input' => $this->_inputParameters,
+			]);
 		}
 
 		return $this;
@@ -180,9 +192,11 @@ class Statement extends PDOStatement
 	 */
 	public function fetch($mode = null, $cursorOrientation = \PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
 	{
-		if ((!$this->isFetchFriendly) && ($this->pdo->logger)) {
-			$msg = 'Attempted fetch on non-select/show query:' . PHP_EOL . $this->queryString;
-			$this->pdo->logger->logError((new RuntimeException($msg)));
+		if ((!$this->isFetchFriendly) && ($this->pdo->log)) {
+			$this->pdo->log->addError('Attempted fetch on non-select/show query', [
+				'query' => $this->queryString,
+			]);
+
 		}
 
 		return parent::fetch($mode, $cursorOrientation, $cursorOffset);

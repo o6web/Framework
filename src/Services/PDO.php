@@ -5,7 +5,7 @@ namespace O6\Framework\Services;
 use Exception;
 use O6\Framework\Services\PDO\DatabaseName;
 use O6\Framework\Services\PDO\Statement;
-use O6\Logging\Logger;
+use Monolog\Logger;
 use PDOException;
 use RuntimeException;
 
@@ -20,7 +20,7 @@ class PDO extends \PDO
 	public const NULL_OPT_DISALLOW = 2;
 
 	public int $hasError = 0;
-	public ?Logger $logger;
+	public ?Logger $log;
 	protected int $_transactionDepth = 0;
 	private string $_database = '';
 	private array $_param = [];
@@ -48,9 +48,9 @@ class PDO extends \PDO
 		}
 	}
 
-	public function setLogger(Logger $logger): void
+	public function setLogger(Logger $log): void
 	{
-		$this->logger = $logger;
+		$this->log = $log;
 	}
 
 	/**
@@ -142,8 +142,11 @@ class PDO extends \PDO
 		} catch (Exception $e) {
 			$this->hasError = 1;
 
-			if ($this->logger) {
-				$this->logger->logException($e, $statement);
+			if ($this->log) {
+				$this->log->addException('Statement could not be executed', [
+					'statement' => $statement,
+					'exception' => $e,
+				]);
 			}
 		}
 
@@ -210,8 +213,11 @@ class PDO extends \PDO
 		} catch (Exception $e) {
 			$this->hasError = 1;
 
-			if ($this->logger) {
-				$this->logger->logException($e, $query);
+			if ($this->log) {
+				$this->log->addException('Statement could not be prepared', [
+					'statement' => $stmt,
+					'exception' => $e,
+				]);
 			}
 		}
 
@@ -233,8 +239,11 @@ class PDO extends \PDO
 			return parent::query($statement, $mode, $arg3, $ctorargs);
 		} catch (Exception $e) {
 			$this->hasError = 1;
-			if ($this->logger) {
-				$this->logger->logException($e, $statement);
+			if ($this->log) {
+				$this->log->addException('Statement could not be executed', [
+					'statement' => $statement,
+					'exception' => $e,
+				]);
 			}
 		}
 
@@ -254,9 +263,10 @@ class PDO extends \PDO
 	public function run(string $statement, int $mode = self::FETCH_ASSOC)
 	{
 		if (!in_array($mode, [self::FETCH_ASSOC, self::FETCH_NUM, self::FETCH_BOTH], true)) {
-			if ($this->logger) {
-				$msg = 'Invalid fetch mode defined';
-				$this->logger->logError(new Exception($msg));
+			if ($this->log) {
+				$this->log->addError('Invalid fetch mode defined', [
+					'mode' => $mode,
+				]);
 			}
 
 			return false;
@@ -267,8 +277,11 @@ class PDO extends \PDO
 		} catch (Exception $e) {
 			$this->hasError = 1;
 
-			if ($this->logger) {
-				$this->logger->logException($e, $statement);
+			if ($this->log) {
+				$this->log->addException('Statement could not be executed', [
+					'statement' => $statement,
+					'exception' => $e,
+				]);
 			}
 		}
 
