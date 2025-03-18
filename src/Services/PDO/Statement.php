@@ -134,7 +134,7 @@ class Statement extends PDOStatement
 			$this->pdo->hasError = 1;
 
 			if ($this->pdo->log) {
-				$this->pdo->log->addException('Value could not be bound', [
+				$this->pdo->log->addCritical('Value could not be bound', [
 					'parameter' => $param,
 					'value' => $value,
 					'type' => $type,
@@ -161,7 +161,7 @@ class Statement extends PDOStatement
 			$this->pdo->hasError = 1;
 
 			if ($this->pdo->log) {
-				$this->pdo->log->addException('Statement could not be executed', [
+				$this->pdo->log->addCritical('Statement could not be executed', [
 					'exception' => $e,
 					'debug' => $this->debugDumpParams(),
 					'input' => $this->_inputParameters,
@@ -172,7 +172,7 @@ class Statement extends PDOStatement
 		}
 
 		if ((!$this->executeResponse) && ($this->pdo->log)) {
-			$this->pdo->log->addException('Prepared statement could not be executed', [
+			$this->pdo->log->addCritical('Prepared statement could not be executed', [
 				'error' => $this->errorInfo(),
 				'debug' => $this->debugDumpParams(),
 				'input' => $this->_inputParameters,

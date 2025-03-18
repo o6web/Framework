@@ -143,7 +143,7 @@ class PDO extends \PDO
 			$this->hasError = 1;
 
 			if ($this->log) {
-				$this->log->addException('Statement could not be executed', [
+				$this->log->addCritical('Statement could not be executed', [
 					'statement' => $statement,
 					'exception' => $e,
 				]);
@@ -214,7 +214,7 @@ class PDO extends \PDO
 			$this->hasError = 1;
 
 			if ($this->log) {
-				$this->log->addException('Statement could not be prepared', [
+				$this->log->addCritical('Statement could not be prepared', [
 					'statement' => $stmt,
 					'exception' => $e,
 				]);
@@ -240,7 +240,7 @@ class PDO extends \PDO
 		} catch (Exception $e) {
 			$this->hasError = 1;
 			if ($this->log) {
-				$this->log->addException('Statement could not be executed', [
+				$this->log->addCritical('Statement could not be executed', [
 					'statement' => $statement,
 					'exception' => $e,
 				]);
@@ -278,7 +278,7 @@ class PDO extends \PDO
 			$this->hasError = 1;
 
 			if ($this->log) {
-				$this->log->addException('Statement could not be executed', [
+				$this->log->addCritical('Statement could not be executed', [
 					'statement' => $statement,
 					'exception' => $e,
 				]);
