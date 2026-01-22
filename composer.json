@@ -1,0 +1,29 @@
+{
+  "name": "o6web/framework",
+  "description": "Framework for O6 Web Properties sites",
+  "version": "0.5.0",
+  "homepage": "https://www.o6web.net",
+  "authors": [
+    {
+      "name": "Clark Rasmussen",
+      "homepage": "https://cjr.dev",
+      "role": "Developer"
+    }
+  ],
+  "config":{
+    "cache-files-ttl":0
+  },
+  "require": {
+    "php": ">=7.4.0",
+    "ext-json": "*",
+    "cjrasmussen/request": "^2.0.0"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-latest"
+  },
+  "autoload": {
+    "psr-4": {
+      "o6web\\Framework\\": "src/"
+    }
+  }
+}
