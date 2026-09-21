@@ -83,7 +83,7 @@ class Redirect
 			}
 
 			if (($val !== null) && ($val !== '') && (!in_array($key, $ignore, true))) {
-				if (false !== strpos($key, 'month')) {
+				if (str_contains($key, 'month')) {
 					if ($key === 'month') {
 						if ($get['year']) {
 							$date = $get['year'] . '-' . $get['month'] . '-' . $get['day'];
@@ -123,7 +123,7 @@ class Redirect
 							$query_string .= $key . '=' . $val . '&';
 						}
 					}
-				} elseif (false !== strpos($key, 'date')) {
+				} elseif (str_contains($key, 'date')) {
 					if (($get['date1']) && ($get['date2'])) {
 						if ($get['date1'] === $get['date2']) {
 							$query_string .= 'date=' . $get['date1'] . '&';
@@ -152,7 +152,7 @@ class Redirect
 			}
 		}
 
-		if (substr($query_string, -1) === '&') {
+		if (str_ends_with($query_string, '&')) {
 			$query_string = substr($query_string, 0, -1);
 		}
 

@@ -1,7 +1,7 @@
 {
   "name": "o6web/framework",
   "description": "Framework for O6 Web Properties sites",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "homepage": "https://www.o6web.net",
   "authors": [
     {
@@ -14,9 +14,9 @@
     "cache-files-ttl":0
   },
   "require": {
-    "php": ">=7.4.0",
+    "php": ">=8.5.0",
     "ext-json": "*",
-    "cjrasmussen/request": "^2.0.0"
+    "cjrasmussen/request": "^3.0.0"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest"

@@ -6,13 +6,13 @@ use RuntimeException;
 
 class SiteConfigLoader
 {
-	private const ROOT_DIR = '/_sites/';
-	private const CONFIG_FILE_PATH = '/_includes/config/config.php';
+	private const string ROOT_DIR = '/_sites/';
+	private const string CONFIG_FILE_PATH = '/_includes/config/config.php';
 
-	private $globalSiteRootPath;
-	private $globalConfigPath;
-	private $localSiteFolder;
-	private $config;
+	private string $globalSiteRootPath;
+	private string $globalConfigPath;
+	private string $localSiteFolder;
+	private array $config;
 
 	public function __construct()
 	{
@@ -31,7 +31,7 @@ class SiteConfigLoader
 	 * @param string|null $config_file_path
 	 * @return array
 	 */
-	public function loadConfig($site_folder = null, $config_file_path = null): array
+	public function loadConfig(?string $site_folder = null, ?string $config_file_path = null): array
 	{
 		if (!$this->config[$site_folder]) {
 			if (!$site_folder) {
@@ -93,7 +93,7 @@ class SiteConfigLoader
 	 * @param array|null $global
 	 * @return array
 	 */
-	private function loadLocalConfig(string $local_config_path, $global = null): array
+	private function loadLocalConfig(string $local_config_path, ?array $global = null): array
 	{
 		if (!is_array($global)) {
 			// GET THE GLOBAL VALUES SO THAT THEY'RE AVAILABLE WHEN LOADING LOCAL VALUES
@@ -122,10 +122,10 @@ class SiteConfigLoader
 	public function mergeConfigArrays(array $new, array &$existing): void
 	{
 		foreach ($new AS $key => $value) {
-			if ((is_array($new[$key])) AND (is_array($existing[$key]))) {
-				$this->mergeConfigArrays($new[$key], $existing[$key]);
-			} elseif (($new[$key]) AND (!$existing[$key])) {
-				$existing[$key] = $new[$key];
+			if ((is_array($value)) && (is_array($existing[$key]))) {
+				$this->mergeConfigArrays($value, $existing[$key]);
+			} elseif (($value) && (!$existing[$key])) {
+				$existing[$key] = $value;
 			}
 		}
 	}

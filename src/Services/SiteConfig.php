@@ -27,10 +27,10 @@ abstract class SiteConfig
 	 * Add an element to the configuration array
 	 *
 	 * @param string $key
-	 * @param string|int|array $value
+	 * @param int|array|string $value
 	 * @return void
 	 */
-	public function setConfigurationValue(string $key, $value): void
+	public function setConfigurationValue(string $key, int|array|string $value): void
 	{
 		$this->siteConfigArray[$key] = $value;
 	}
@@ -54,7 +54,7 @@ abstract class SiteConfig
 	 * @param string $path
 	 * @return array|mixed|null
 	 */
-	public function getConfigurationValueByPath(string $path)
+	public function getConfigurationValueByPath(string $path): mixed
 	{
 		$keys = explode('/', $path);
 

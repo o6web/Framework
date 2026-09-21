@@ -73,7 +73,7 @@ abstract class BaseModel
 	 * @return mixed
 	 * @throws Exception
 	 */
-	protected static function buildFromArray(array $data, $class, ?array $map = [], bool $ignoreTypeMismatch = false)
+	protected static function buildFromArray(array $data, $class, ?array $map = [], bool $ignoreTypeMismatch = false): mixed
 	{
 		$model = new $class;
 		self::setModelPropertiesNotHydrated($model);
