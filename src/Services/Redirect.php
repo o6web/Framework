@@ -34,19 +34,18 @@ class Redirect
 	{
 		$get = $this->requestData->query->all();
 
-		if ((!$get['clean']) || (!count($get))) {
+		if ((!isset($get['clean'])) || (!count($get))) {
 			// NOT CLEANABLE, GET OUT
 			return $this;
 		}
 
 		$query_string = '';
 
-		if ($get['date'] && (($get['date1']) || ($get['date2']))) {
+		if (isset($get['date']) && ((isset($get['date1'])) || (isset($get['date2'])))) {
 			if ($get['date_type'] === 'range') {
-				unset($get['date']);
+				$get['date'] = null;
 			} else {
-				unset($get['date1']);
-				unset($get['date2']);
+				$get['date1'] = $get['date2'] = null;
 			}
 		}
 
@@ -54,7 +53,7 @@ class Redirect
 			'date_type',
 		];
 
-		if ($get['arr']) {
+		if (isset($get['arr'])) {
 			[$array_name, $array_items] = explode('_', $get['arr']);
 
 			$array_str = '';
@@ -167,5 +166,4 @@ class Redirect
 
 		return $this;
 	}
-
 }
